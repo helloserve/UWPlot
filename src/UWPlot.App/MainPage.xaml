@@ -1,0 +1,31 @@
+﻿<Page
+    x:Class="UWPlot.App.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:h="using:helloserve.com.UWPlot" 
+    xmlns:local="using:UWPlot.App"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <h:LinePlot 
+            FontSize="15"
+            DataContext="{x:Bind ViewModel}"
+            Padding="10">
+            <h:LinePlot.XAxis>
+                <h:XAxis Description="X Axis Description"/>
+            </h:LinePlot.XAxis>
+            <h:LinePlot.YAxis>
+                <h:YAxis Name="Category1" Description="Primary Y Axis Description"/>
+                <h:YAxis Name="Category2" Description="Secondary Y Axis Description"/>
+            </h:LinePlot.YAxis>
+            <h:LinePlot.Series>
+                <h:Series ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Series 1"/>
+                <h:Series ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
+                <h:Series ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>
+            </h:LinePlot.Series>
+        </h:LinePlot>
+    </Grid>
+</Page>

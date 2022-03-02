@@ -1,0 +1,32 @@
+# Build Results
+[Oo]bj/
+[Bb]in/
+[Dd]ebug/
+*.dll
+*.pdb
+packages/
+Backup/
+UpgradeLog.htm
+.sonarqube
+AppPackages/
+BundleArtifacts/
+
+# User-specific files
+*.suo
+*.user
+.vs/
+*.lock.json
+
+# Include Components
+!/Components/*.dll
+!/Components/*/*.dll
+!/Components/*/*/*.dll
+!/Components/*/*/*/*.dll
+
+# Local artifacts
+local_data/
+
+# Statements
+**/Files/*.pdf
+**/Files/*.csv
+**/Files/*.ofx
