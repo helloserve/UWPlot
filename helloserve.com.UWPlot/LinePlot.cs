@@ -6,6 +6,7 @@ using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
@@ -18,6 +19,9 @@ namespace helloserve.com.UWPlot
         public List<Series> Series { get; set; } = new List<Series>();
         public List<YAxis> YAxis { get; set; } = new List<YAxis>();
         public XAxis XAxis { get; set; } = new XAxis();
+        public Style ToolTipStyle { get; set; }
+
+        private  SeriesPointToolTip toolTip { get; set; } = new SeriesPointToolTip();
 
         public LinePlot()
         {
@@ -25,11 +29,12 @@ namespace helloserve.com.UWPlot
 
             DataContextChanged += LinePlot3_DataContextChanged;
             Loaded += LinePlot3_Loaded;
+
+            IsHitTestVisible = true;
         }
 
         private Grid layoutRoot = null;
 
-        //private List<SeriesMetaData> seriesMeta = new List<SeriesMetaData>();
         private int numberOfScaleLines;
         private double scaleLineIncrements;
         private double? valueMin;
@@ -48,7 +53,42 @@ namespace helloserve.com.UWPlot
         private void LinePlot3_Loaded(object sender, RoutedEventArgs e)
         {
             layoutRoot = (Grid)VisualTreeHelper.GetChild(this, 0);
+            layoutRoot.PointerMoved += LayoutRoot_PointerMoved;
+            layoutRoot.PointerExited += LayoutRoot_PointerExited;
+            toolTip.Visibility = Visibility.Collapsed;
+            toolTip.Style = ToolTipStyle;
+
             Layout();
+        }
+
+        private void LayoutRoot_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            toolTip.Visibility = Visibility.Collapsed;
+        }
+
+        private void LayoutRoot_PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            Point pointerPosition = Windows.UI.Core.CoreWindow.GetForCurrentThread().PointerPosition;
+            double x = Math.Max(0, pointerPosition.X - Window.Current.Bounds.X);
+            double y = Math.Max(0, pointerPosition.Y - Window.Current.Bounds.Y);
+
+            if (x < plotAreaTopLeft.X || x > plotAreaBottomRight.X || y < plotAreaTopLeft.Y || y > plotAreaBottomRight.Y)
+            {
+                return;
+            }
+            
+            Size size = toolTip.GetContentSize(new Size(plotAreaBottomRight.X - plotAreaTopLeft.X, plotAreaBottomRight.Y - plotAreaTopLeft.Y));
+
+            x += 32;
+            y += 32;
+            double x1 = plotAreaBottomRight.X - x - size.Width;
+            double y1 = plotAreaBottomRight.Y - y - size.Height;
+
+            toolTip.Margin = new Thickness(x, y, x1, y1);
+            toolTip.Visibility = Visibility.Visible;
+            toolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}  Margin: ({toolTip.Margin.Left},{toolTip.Margin.Top})x({toolTip.Margin.Right},{toolTip.Margin.Bottom})");
+
+            Invalidate();
         }
 
         private void LinePlot3_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
@@ -92,7 +132,6 @@ namespace helloserve.com.UWPlot
                 return;
             }
 
-            //seriesMeta = new List<SeriesMetaData>();
             foreach(Series series in Series)
             {
                 SeriesMetaData meta = series.PrepareData(DataContext);
@@ -112,8 +151,6 @@ namespace helloserve.com.UWPlot
                 {
                     longestCategory = meta.LongestCategory;
                 }
-
-                //seriesMeta.Add(meta);
             }
         }
 
@@ -246,6 +283,8 @@ namespace helloserve.com.UWPlot
             Measure();
             DrawPlotArea();
             DrawSeries();
+
+            layoutRoot.Children.Add(toolTip);
         }
 
         private void Measure()
@@ -467,7 +506,8 @@ namespace helloserve.com.UWPlot
                         double marginRatioX = linePlotPoints[i].Item1.X / ActualWidth;
                         double marginRatioY = linePlotPoints[i].Item1.Y / ActualHeight;
 
-                        point.Margin = new Thickness((ActualWidth * 2 * marginRatioX) - ActualWidth, (ActualHeight * 2 * marginRatioY) - ActualHeight, 0, 0);
+                        point.Margin = new Thickness((ActualWidth * 2 * marginRatioX) - ActualWidth - (pointSize * 0.5), (ActualHeight * 2 * marginRatioY) - ActualHeight - (pointSize * 2), 0, 0);
+                        point.DataContext = linePlotPoints[i].Item2;
 
                         layoutRoot.Children.Add(point);
                     }

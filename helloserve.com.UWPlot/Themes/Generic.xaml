@@ -10,8 +10,26 @@
                     <Grid
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        IsHitTestVisible="True">
                     </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="local:SeriesPointToolTip" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SeriesPointToolTip">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"                        
+                        MinWidth="200"
+                        MinHeight="150">
+                        <TextBlock x:Name="DebugBlock" Text="Hint Text" Foreground="{TemplateBinding Foreground}"/>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

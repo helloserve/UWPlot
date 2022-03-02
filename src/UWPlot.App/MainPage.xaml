@@ -8,7 +8,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
     <Grid>
         <h:LinePlot 
             FontSize="15"
@@ -26,6 +25,14 @@
                 <h:Series ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
                 <h:Series ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>
             </h:LinePlot.Series>
+            <h:LinePlot.ToolTipStyle>
+                <Style TargetType="h:SeriesPointToolTip">
+                    <Setter Property="Background" Value="Black"/>
+                    <Setter Property="Foreground" Value="Gray"/>
+                    <Setter Property="BorderBrush" Value="Gray"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Style>
+            </h:LinePlot.ToolTipStyle>
         </h:LinePlot>
     </Grid>
 </Page>
