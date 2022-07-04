@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31829.152
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWPlot.App", "src\UWPlot.App\UWPlot.App.csproj", "{129BB728-40C9-4D27-BB8F-775A08BF79F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "helloserve.com.UWPlot", "helloserve.com.UWPlot\helloserve.com.UWPlot.csproj", "{7C07AB02-01FD-4FEB-9044-68824EFD7212}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "helloserve.com.UWPlot", "src\helloserve.com.UWPlot\helloserve.com.UWPlot.csproj", "{7C07AB02-01FD-4FEB-9044-68824EFD7212}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

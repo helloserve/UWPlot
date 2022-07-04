@@ -20,15 +20,22 @@ namespace helloserve.com.UWPlot
         public List<YAxis> YAxis { get; set; } = new List<YAxis>();
         public XAxis XAxis { get; set; } = new XAxis();
         public Style ToolTipStyle { get; set; }
-
+        public double PaddingFactor { get; set; } = 1;
         private  SeriesPointToolTip toolTip { get; set; } = new SeriesPointToolTip();
+        public List<SolidColorBrush> PlotColors = new List<SolidColorBrush>()
+        {
+                new SolidColorBrush(Colors.PowderBlue),
+                new SolidColorBrush(Colors.PaleVioletRed),
+                new SolidColorBrush(Colors.LightSeaGreen)
+        };
 
         public LinePlot()
         {
             this.DefaultStyleKey = typeof(LinePlot);
 
-            DataContextChanged += LinePlot3_DataContextChanged;
-            Loaded += LinePlot3_Loaded;
+            DataContextChanged += LinePlot_DataContextChanged;
+            Loaded += LinePlot_Loaded;
+            SizeChanged += LinePlot_SizeChanged;
 
             IsHitTestVisible = true;
         }
@@ -50,7 +57,7 @@ namespace helloserve.com.UWPlot
         private Point legendAreaBottomRight;
         private double legendItemIndicatorWidth;
 
-        private void LinePlot3_Loaded(object sender, RoutedEventArgs e)
+        private void LinePlot_Loaded(object sender, RoutedEventArgs e)
         {
             layoutRoot = (Grid)VisualTreeHelper.GetChild(this, 0);
             layoutRoot.PointerMoved += LayoutRoot_PointerMoved;
@@ -91,7 +98,7 @@ namespace helloserve.com.UWPlot
             Invalidate();
         }
 
-        private void LinePlot3_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        private void LinePlot_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
             INotifyPropertyChanged contextNotify = DataContext as INotifyPropertyChanged;
             if (contextNotify != null)
@@ -105,17 +112,22 @@ namespace helloserve.com.UWPlot
                 contextNotify.PropertyChanged += ContextNotify_PropertyChanged;
             }
 
-            Invalidate();
+            ContextNotify_PropertyChanged(this,  new PropertyChangedEventArgs(nameof(DataContext)));
         }
 
         private void ContextNotify_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PrepareData();
+            Invalidate();
+        }
+
+        private void LinePlot_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Invalidate();
         }
 
         private void Invalidate()
         {
-            PrepareData();
             Layout();
             InvalidateArrange();
         }
@@ -182,7 +194,7 @@ namespace helloserve.com.UWPlot
                     message = string.Empty;
                     foreach(var series in Series)
                     {
-                        if (series.ItemsDataPoints == null || series.ItemsDataPoints.Count == 0)
+                        if (series.ItemsDataPoints is null || series.ItemsDataPoints.Count == 0)
                         {
                             message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} is not defined or empty.";
                         }
@@ -190,7 +202,7 @@ namespace helloserve.com.UWPlot
                 }
             }
 
-            //exit there to prevent a slew of null-checks below
+            //exit here to prevent a slew of null-checks below
             if (!string.IsNullOrEmpty(message))
             {
                 return false;
@@ -297,7 +309,7 @@ namespace helloserve.com.UWPlot
             {
                 if (!string.IsNullOrEmpty(legendSeries.LegendDescription))
                 {
-                    Size descriptionSize = legendSeries.LegendDescription.MeasureTextSize(FontSize);
+                    Size descriptionSize = legendSeries.LegendDescription.MeasureTextSize(FontSize).WithFactor(PaddingFactor);
                     
                     legendWidth += descriptionSize.Width;
 
@@ -319,8 +331,8 @@ namespace helloserve.com.UWPlot
             legendAreaBottomRight = new Point(ActualWidth * 0.5 + (legendWidth * 0.5), Padding.Top + legendHeight);
             
             //plot area elements
-            Size valueTextMaxSize = valueMaxString.MeasureTextSize(FontSize);                        
-            Size categoryTextMaxSize = longestCategory.MeasureTextSize(FontSize);
+            Size valueTextMaxSize = valueMaxString.MeasureTextSize(FontSize).WithFactor(PaddingFactor);
+            Size categoryTextMaxSize = longestCategory.MeasureTextSize(FontSize, transform: XAxis.LabelTransform).WithFactor(PaddingFactor);
             
             plotAreaTopLeft = new Point(Padding.Left + Math.Max(valueTextMaxSize.Width, categoryTextMaxSize.Width / 2), Padding.Top + legendHeight);
             plotAreaBottomRight = new Point(ActualWidth - Padding.Right - Math.Max(valueTextMaxSize.Width, categoryTextMaxSize.Width / 2), ActualHeight - Padding.Bottom - categoryTextMaxSize.Height - legendHeight);
@@ -375,6 +387,16 @@ namespace helloserve.com.UWPlot
 
             double gridLineStrokeThickness = 0.5;
 
+            layoutRoot.DrawLine(plotAreaTopLeft.X, plotAreaTopLeft.Y, plotAreaTopLeft.X, plotAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawLine(plotAreaTopLeft.X, plotAreaBottomRight.Y, plotAreaBottomRight.X, plotAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawLine(plotAreaBottomRight.X, plotAreaBottomRight.Y, plotAreaBottomRight.X, plotAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawLine(plotAreaBottomRight.X, plotAreaTopLeft.Y, plotAreaTopLeft.X, plotAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+
+            layoutRoot.DrawLine(legendAreaTopLeft.X, legendAreaTopLeft.Y, legendAreaTopLeft.X, legendAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawLine(legendAreaTopLeft.X, legendAreaBottomRight.Y, legendAreaBottomRight.X, legendAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawLine(legendAreaBottomRight.X, legendAreaBottomRight.Y, legendAreaBottomRight.X, legendAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawLine(legendAreaBottomRight.X, legendAreaTopLeft.Y, legendAreaTopLeft.X, legendAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+
             for (int i = 0; i < numberOfScaleLines; i++)
             {
                 double x1 = plotAreaTopLeft.X;
@@ -399,7 +421,7 @@ namespace helloserve.com.UWPlot
                     double x2 = plotAreaBottomRight.X;
                     double y2 = y1;
                     
-                    layoutRoot.DrawScaleValueItem(value.FormatObject(series?.ValueFormat), axis.AxisType == UWPlot.YAxis.YAxisType.Primary ? x1 : x2, y1, FontSize, axis.AxisType);
+                    layoutRoot.DrawScaleValueItem(value.FormatObject(series?.ValueFormat), axis.AxisType == UWPlot.YAxis.YAxisType.Primary ? x1 : x2, y1, FontSize, axis.AxisType, paddingFactor: PaddingFactor, transform: axis.LabelTransform);
                 }
             }
 
@@ -407,44 +429,29 @@ namespace helloserve.com.UWPlot
             for (int i = 0; i < verticalGridLineCount; i++)
             {
                 layoutRoot.DrawLine(lineStepX, plotAreaTopLeft.Y, lineStepX, plotAreaBottomRight.Y, plotAreaStroke, gridLineStrokeThickness);
-                layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, plotAreaBottomRight.Y, FontSize);
+                layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, plotAreaBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
                 
                 lineStepX += verticalGridLineSpace;
             }
-            layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[0].Category, plotAreaTopLeft.X, plotAreaBottomRight.Y, FontSize);
-            layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[Series[0].ItemsDataPoints.Count - 1].Category, plotAreaBottomRight.X, plotAreaBottomRight.Y, FontSize);
-
-            layoutRoot.DrawLine(plotAreaTopLeft.X, plotAreaTopLeft.Y, plotAreaTopLeft.X, plotAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            layoutRoot.DrawLine(plotAreaTopLeft.X, plotAreaBottomRight.Y, plotAreaBottomRight.X, plotAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            layoutRoot.DrawLine(plotAreaBottomRight.X, plotAreaBottomRight.Y, plotAreaBottomRight.X, plotAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            layoutRoot.DrawLine(plotAreaBottomRight.X, plotAreaTopLeft.Y, plotAreaTopLeft.X, plotAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-
-            layoutRoot.DrawLine(legendAreaTopLeft.X, legendAreaTopLeft.Y, legendAreaTopLeft.X, legendAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            layoutRoot.DrawLine(legendAreaTopLeft.X, legendAreaBottomRight.Y, legendAreaBottomRight.X, legendAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            layoutRoot.DrawLine(legendAreaBottomRight.X, legendAreaBottomRight.Y, legendAreaBottomRight.X, legendAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            layoutRoot.DrawLine(legendAreaBottomRight.X, legendAreaTopLeft.Y, legendAreaTopLeft.X, legendAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[0].Category, plotAreaTopLeft.X, plotAreaBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
+            layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[Series[0].ItemsDataPoints.Count - 1].Category, plotAreaBottomRight.X, plotAreaBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
 
             double legendX = 0;
             foreach (Series series in Series)
             {
-                var drawSize = layoutRoot.DrawLegendItem(series.LegendDescription, legendX + legendAreaTopLeft.X, legendAreaTopLeft.Y, FontSize, legendItemIndicatorWidth, Colors.AliceBlue);
+                var drawSize = layoutRoot.DrawLegendItem(series.LegendDescription, legendX + legendAreaTopLeft.X, legendAreaTopLeft.Y, FontSize, legendItemIndicatorWidth, PlotColors[Series.IndexOf(series)]);
                 legendX += drawSize.Width;
             }
         }
 
         private void DrawSeries()
         {
-            SolidColorBrush[] plotColors = new SolidColorBrush[]
-            {
-                new SolidColorBrush(Colors.PowderBlue),
-                new SolidColorBrush(Colors.PaleVioletRed),
-                new SolidColorBrush(Colors.LightSeaGreen),
-            };
             double plotThickness = 4;
 
             double plotHeight = plotAreaBottomRight.Y - plotAreaTopLeft.Y;
-            double? prevX = null;
-            double? prevY = null;
+
+            List<Tuple<Point, SeriesDataPoint>>[] seriesPrep = new List<Tuple<Point, SeriesDataPoint>>[Series.Count];
+
             foreach (Series series in Series)
             {
                 YAxis axis = YAxis.SingleOrDefault(a => a.Name == series.AxisName);
@@ -470,8 +477,19 @@ namespace helloserve.com.UWPlot
                     linePlotPoints.Add(new Tuple<Point, SeriesDataPoint>(new Point(x, y), dataPoint));
                 }
 
+                seriesPrep[Series.IndexOf(series)] = linePlotPoints;
+            }
+
+            for (int s = 0; s < seriesPrep.Length; s++)
+            {
+                var series = Series[s];
+                var linePlotPoints = seriesPrep[s];
+
+                double? prevX = null;
+                double? prevY = null;
+
                 for (int i = 0; i < linePlotPoints.Count; i++)
-                {   
+                {
                     if (!linePlotPoints[i].Item2.Value.HasValue)
                     {
                         prevX = null;
@@ -481,12 +499,18 @@ namespace helloserve.com.UWPlot
 
                     if (prevX.HasValue && prevY.HasValue)
                     {
-                        layoutRoot.DrawLine(prevX.Value, prevY.Value, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, plotColors[Series.IndexOf(series)], plotThickness);
+                        layoutRoot.DrawLine(prevX.Value, prevY.Value, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, PlotColors[Series.IndexOf(series)], plotThickness);
                     }
-                   
+
                     prevX = linePlotPoints[i].Item1.X;
                     prevY = linePlotPoints[i].Item1.Y;
                 }
+            }
+
+            for (int s = 0; s < seriesPrep.Length; s++)
+            {
+                var series = Series[s];
+                var linePlotPoints = seriesPrep[s];
 
                 for (int i = 0; i < linePlotPoints.Count; i++)
                 {
@@ -501,22 +525,19 @@ namespace helloserve.com.UWPlot
                         Ellipse point = new Ellipse();
                         point.Width = pointSize;
                         point.Height = pointSize;
-                        point.Fill = plotColors[Series.IndexOf(series)];
+                        point.Fill = PlotColors[Series.IndexOf(series)];
 
                         double marginRatioX = linePlotPoints[i].Item1.X / ActualWidth;
                         double marginRatioY = linePlotPoints[i].Item1.Y / ActualHeight;
 
-                        point.Margin = new Thickness((ActualWidth * 2 * marginRatioX) - ActualWidth - (pointSize * 0.5), (ActualHeight * 2 * marginRatioY) - ActualHeight - (pointSize * 2), 0, 0);
+                        point.Margin = new Thickness((ActualWidth * 2 * marginRatioX) - ActualWidth, (ActualHeight * 2 * marginRatioY) - ActualHeight, 0, 0);
                         point.DataContext = linePlotPoints[i].Item2;
 
                         layoutRoot.Children.Add(point);
                     }
 
-                    layoutRoot.DrawScaleValueItem(linePlotPoints[i].Item2.ValueText, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, FontSize, UWPlot.YAxis.YAxisType.Primary);
+                    layoutRoot.DrawPlotValueItem(linePlotPoints[i].Item2.ValueText, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, FontSize);
                 }
-
-                prevX = null;
-                prevY = null;
             }
         }
     }

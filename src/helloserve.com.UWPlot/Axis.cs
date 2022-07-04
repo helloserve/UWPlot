@@ -19,7 +19,7 @@ namespace helloserve.com.UWPlot
         /// <summary>
         /// A transform that will be applied to each increment label on the axis
         /// </summary>
-        public Transform LabelTransform { get; set; }
+        public Transform LabelTransform { get; set; } = new TranslateTransform();
     }
 
     public class XAxis : Axis

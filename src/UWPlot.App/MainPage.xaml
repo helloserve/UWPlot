@@ -12,9 +12,17 @@
         <h:LinePlot 
             FontSize="15"
             DataContext="{x:Bind ViewModel}"
+            PaddingFactor="1.2"
             Padding="10">
             <h:LinePlot.XAxis>
-                <h:XAxis Description="X Axis Description"/>
+                <h:XAxis Description="X Axis Description">
+                    <h:XAxis.LabelTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="320"/>
+                            <TranslateTransform Y="40"/>
+                        </TransformGroup>
+                    </h:XAxis.LabelTransform>
+                </h:XAxis>
             </h:LinePlot.XAxis>
             <h:LinePlot.YAxis>
                 <h:YAxis Name="Category1" Description="Primary Y Axis Description"/>

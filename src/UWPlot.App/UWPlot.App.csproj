@@ -156,7 +156,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\helloserve.com.UWPlot\helloserve.com.UWPlot.csproj">
+    <ProjectReference Include="..\helloserve.com.UWPlot\helloserve.com.UWPlot.csproj">
       <Project>{7c07ab02-01fd-4feb-9044-68824efd7212}</Project>
       <Name>helloserve.com.UWPlot</Name>
     </ProjectReference>
