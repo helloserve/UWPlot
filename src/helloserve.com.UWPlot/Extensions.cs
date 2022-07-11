@@ -98,9 +98,31 @@ namespace helloserve.com.UWPlot
         /// <param name="fontSize"></param>
         /// <param name="limitedToWidth"></param>
         /// <param name="limitedToHeight"></param>
-        public static void DrawPlotValueItem(this Panel layoutRoot, string value, double x, double y, double fontSize, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        public static void DrawPlotValueItem(this Panel layoutRoot, string value, double x, double y, double fontSize, Rect plotArea, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
-            layoutRoot.DrawString(value, fontSize, size => new Thickness(x - size.Width / 2 * paddingFactor, y + size.Height, 0, 0), paddingFactor, transform);
+            layoutRoot.DrawString(value, fontSize, size => 
+            {
+                double offsetPadding = 0.2D;
+                var plotX = x - size.Width / 2 * paddingFactor;
+                var plotY = y + size.Height;
+                if (plotX < plotArea.X)
+                {
+                    plotX = plotArea.X + size.Width * offsetPadding;
+                }
+                if (plotX + size.Width > plotArea.X + plotArea.Width)
+                {
+                    plotX = plotArea.X + plotArea.Width - size.Width - size.Width * offsetPadding;
+                }
+                if (plotY < plotArea.Y)
+                {
+                    plotY = plotArea.Y + size.Height * offsetPadding;
+                }
+                if (plotY + size.Height > plotArea.Y + plotArea.Height)
+                {
+                    plotY = plotArea.Y + plotArea.Height - size.Height - size.Height * offsetPadding;
+                }
+                return new Thickness(plotX, plotY, 0, 0);
+            }, paddingFactor, transform);
         }
 
         /// <summary>
@@ -153,7 +175,6 @@ namespace helloserve.com.UWPlot
 
             textBlock.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             Size desiredSize = textBlock.DesiredSize.WithFactor(paddingFactor);
-            
             textBlock.Margin = positionFunc(desiredSize);
 
             layoutRoot.Children.Add(textBlock);

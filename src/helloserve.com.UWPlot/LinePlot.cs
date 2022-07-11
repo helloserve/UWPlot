@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -21,7 +22,7 @@ namespace helloserve.com.UWPlot
         public XAxis XAxis { get; set; } = new XAxis();
         public Style ToolTipStyle { get; set; }
         public double PaddingFactor { get; set; } = 1;
-        private  SeriesPointToolTip toolTip { get; set; } = new SeriesPointToolTip();
+
         public List<SolidColorBrush> PlotColors = new List<SolidColorBrush>()
         {
                 new SolidColorBrush(Colors.PowderBlue),
@@ -57,6 +58,9 @@ namespace helloserve.com.UWPlot
         private Point legendAreaBottomRight;
         private double legendItemIndicatorWidth;
 
+        private List<Tuple<Point, SeriesDataPoint>>[] SeriesDataPoints = null;
+        private SeriesPointToolTip toolTip { get; set; } = new SeriesPointToolTip();
+
         private void LinePlot_Loaded(object sender, RoutedEventArgs e)
         {
             layoutRoot = (Grid)VisualTreeHelper.GetChild(this, 0);
@@ -86,14 +90,60 @@ namespace helloserve.com.UWPlot
             
             Size size = toolTip.GetContentSize(new Size(plotAreaBottomRight.X - plotAreaTopLeft.X, plotAreaBottomRight.Y - plotAreaTopLeft.Y));
 
-            x += 32;
-            y += 32;
-            double x1 = plotAreaBottomRight.X - x - size.Width;
-            double y1 = plotAreaBottomRight.Y - y - size.Height;
+            double xDisplay = x + 32;
+            double yDisplay = y + 32;
 
-            toolTip.Margin = new Thickness(x, y, x1, y1);
+            if (xDisplay + size.Width > plotAreaBottomRight.X)
+            {
+                xDisplay = x - 32 - size.Width;
+            }
+            if (yDisplay + size.Height > plotAreaBottomRight.Y)
+            {
+                yDisplay = y - 32 - size.Height;
+            }
+
+            double xDisplay1 = plotAreaBottomRight.X + plotAreaTopLeft.X - (xDisplay + size.Width);
+            double yDisplay1 = plotAreaBottomRight.Y + plotAreaTopLeft.Y - (yDisplay + size.Height);
+
+
+            toolTip.Margin = new Thickness(xDisplay, yDisplay, xDisplay1, yDisplay1);
             toolTip.Visibility = Visibility.Visible;
-            toolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}  Margin: ({toolTip.Margin.Left},{toolTip.Margin.Top})x({toolTip.Margin.Right},{toolTip.Margin.Bottom})");
+
+            //find the point closest to x
+            List<Tuple<Point, SeriesDataPoint>> seriesPoints = SeriesDataPoints[0];
+            int closestX = int.MaxValue;
+            int index = -1;
+            for (int i = 0; i < seriesPoints.Count; i++)
+            {
+                var point = seriesPoints[i];
+                int diffX = Math.Abs((int)Math.Round(point.Item1.X - x));
+                if (diffX < closestX)
+                {
+                    index = i;
+                    closestX = diffX;
+                }
+                if (diffX > closestX)
+                    break;  //if we start to diverge again, we're moving further away
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < SeriesDataPoints.Length; i++)
+            {
+                Series series = Series[i];
+                List<Tuple<Point, SeriesDataPoint>> points = SeriesDataPoints[i];
+                _ = stringBuilder
+                    .Append(series.LegendDescription)
+                    .Append(": ")
+                    .Append(points[index].Item2.ValueText);
+                
+                if (i < SeriesDataPoints.Length - 1)
+                {
+                    stringBuilder.AppendLine();
+                }
+            }
+
+            toolTip.SetDebugText(stringBuilder.ToString());
+            //toolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}\r\nMargin: ({Math.Round(toolTip.Margin.Left)},{Math.Round(toolTip.Margin.Top)})x({Math.Round(toolTip.Margin.Right)},{Math.Round(toolTip.Margin.Bottom)})\r\nPlotArea: ({Math.Round(plotAreaTopLeft.X)},{Math.Round(plotAreaTopLeft.Y)})x({Math.Round(plotAreaBottomRight.X)},{Math.Round(plotAreaBottomRight.Y)})");
 
             Invalidate();
         }
@@ -128,6 +178,7 @@ namespace helloserve.com.UWPlot
 
         private void Invalidate()
         {
+            SeriesDataPoints = null;
             Layout();
             InvalidateArrange();
         }
@@ -144,7 +195,7 @@ namespace helloserve.com.UWPlot
                 return;
             }
 
-            foreach(Series series in Series)
+            foreach (Series series in Series)
             {
                 SeriesMetaData meta = series.PrepareData(DataContext);
 
@@ -325,7 +376,7 @@ namespace helloserve.com.UWPlot
                 }                
             }
 
-            legendItemIndicatorWidth = maxLegendWidth * 0.3;
+            legendItemIndicatorWidth = legendHeight;
             legendWidth += Series.Count * (40 + legendItemIndicatorWidth);
             legendAreaTopLeft = new Point(ActualWidth * 0.5 - (legendWidth * 0.5), Padding.Top);
             legendAreaBottomRight = new Point(ActualWidth * 0.5 + (legendWidth * 0.5), Padding.Top + legendHeight);
@@ -436,7 +487,7 @@ namespace helloserve.com.UWPlot
             layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[0].Category, plotAreaTopLeft.X, plotAreaBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
             layoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[Series[0].ItemsDataPoints.Count - 1].Category, plotAreaBottomRight.X, plotAreaBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
 
-            double legendX = 0;
+            double legendX = (legendAreaBottomRight.X - legendAreaTopLeft.X) * 0.08D;
             foreach (Series series in Series)
             {
                 var drawSize = layoutRoot.DrawLegendItem(series.LegendDescription, legendX + legendAreaTopLeft.X, legendAreaTopLeft.Y, FontSize, legendItemIndicatorWidth, PlotColors[Series.IndexOf(series)]);
@@ -450,40 +501,43 @@ namespace helloserve.com.UWPlot
 
             double plotHeight = plotAreaBottomRight.Y - plotAreaTopLeft.Y;
 
-            List<Tuple<Point, SeriesDataPoint>>[] seriesPrep = new List<Tuple<Point, SeriesDataPoint>>[Series.Count];
-
-            foreach (Series series in Series)
+            if (SeriesDataPoints == null)
             {
-                YAxis axis = YAxis.SingleOrDefault(a => a.Name == series.AxisName);
-                axis = axis ?? YAxis.SingleOrDefault(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
+                SeriesDataPoints = new List<Tuple<Point, SeriesDataPoint>>[Series.Count];
 
-                List<Tuple<Point, SeriesDataPoint>> linePlotPoints = new List<Tuple<Point, SeriesDataPoint>>();
-
-                for (int i = 0; i < series.ItemsDataPoints.Count; i++)
+                foreach (Series series in Series)
                 {
-                    SeriesDataPoint dataPoint = series.ItemsDataPoints[i];
+                    YAxis axis = YAxis.SingleOrDefault(a => a.Name == series.AxisName);
+                    axis = axis ?? YAxis.SingleOrDefault(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
 
-                    if (!dataPoint.Value.HasValue)
+                    List<Tuple<Point, SeriesDataPoint>> linePlotPoints = new List<Tuple<Point, SeriesDataPoint>>();
+
+                    for (int i = 0; i < series.ItemsDataPoints.Count; i++)
                     {
-                        linePlotPoints.Add(new Tuple<Point, SeriesDataPoint>(new Point(), dataPoint));
-                        continue;
+                        SeriesDataPoint dataPoint = series.ItemsDataPoints[i];
+
+                        if (!dataPoint.Value.HasValue)
+                        {
+                            linePlotPoints.Add(new Tuple<Point, SeriesDataPoint>(new Point(), dataPoint));
+                            continue;
+                        }
+
+                        double plotValue = (dataPoint.Value.Value - axis.CalculatedMin) / axis.CalculateRange * plotHeight;
+
+                        double x = (verticalGridLineSpace * i) + plotAreaTopLeft.X;
+                        double y = plotAreaBottomRight.Y - plotValue;
+
+                        linePlotPoints.Add(new Tuple<Point, SeriesDataPoint>(new Point(x, y), dataPoint));
                     }
 
-                    double plotValue = (dataPoint.Value.Value - axis.CalculatedMin) / axis.CalculateRange * plotHeight;
-
-                    double x = (verticalGridLineSpace * i) + plotAreaTopLeft.X;
-                    double y = plotAreaBottomRight.Y - plotValue;
-
-                    linePlotPoints.Add(new Tuple<Point, SeriesDataPoint>(new Point(x, y), dataPoint));
+                    SeriesDataPoints[Series.IndexOf(series)] = linePlotPoints;
                 }
-
-                seriesPrep[Series.IndexOf(series)] = linePlotPoints;
             }
 
-            for (int s = 0; s < seriesPrep.Length; s++)
+            for (int s = 0; s < SeriesDataPoints.Length; s++)
             {
                 var series = Series[s];
-                var linePlotPoints = seriesPrep[s];
+                var linePlotPoints = SeriesDataPoints[s];
 
                 double? prevX = null;
                 double? prevY = null;
@@ -507,10 +561,10 @@ namespace helloserve.com.UWPlot
                 }
             }
 
-            for (int s = 0; s < seriesPrep.Length; s++)
+            for (int s = 0; s < SeriesDataPoints.Length; s++)
             {
                 var series = Series[s];
-                var linePlotPoints = seriesPrep[s];
+                var linePlotPoints = SeriesDataPoints[s];
 
                 for (int i = 0; i < linePlotPoints.Count; i++)
                 {
@@ -536,7 +590,7 @@ namespace helloserve.com.UWPlot
                         layoutRoot.Children.Add(point);
                     }
 
-                    layoutRoot.DrawPlotValueItem(linePlotPoints[i].Item2.ValueText, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, FontSize);
+                    layoutRoot.DrawPlotValueItem(linePlotPoints[i].Item2.ValueText, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, FontSize, new Rect(plotAreaTopLeft, plotAreaBottomRight));
                 }
             }
         }

@@ -25,9 +25,11 @@
                     <Border
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"                        
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Height="Auto"
+                        Width="Auto"
                         MinWidth="200"
-                        MinHeight="150">
+                        MinHeight="50">
                         <TextBlock x:Name="DebugBlock" Text="Hint Text" Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                 </ControlTemplate>
