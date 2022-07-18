@@ -9,7 +9,17 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <h:LinePlot 
+            Grid.Column="0"
+            Grid.Row="0"
             FontSize="15"
             DataContext="{x:Bind ViewModel}"
             PaddingFactor="1.2"
@@ -42,5 +52,40 @@
                 </Style>
             </h:LinePlot.ToolTipStyle>
         </h:LinePlot>
+        <h:BarPlot
+            Grid.Column="1"
+            Grid.Row="0"
+            FontSize="15"
+            DataContext="{x:Bind ViewModel}"
+            PaddingFactor="1.2"
+            Padding="10">
+            <h:BarPlot.XAxis>
+                <h:XAxis Description="X Axis Description">
+                    <h:XAxis.LabelTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="320"/>
+                            <TranslateTransform Y="40"/>
+                        </TransformGroup>
+                    </h:XAxis.LabelTransform>
+                </h:XAxis>
+            </h:BarPlot.XAxis>
+            <h:BarPlot.YAxis>
+                <h:YAxis Name="Category1" Description="Primary Y Axis Description"/>
+                <h:YAxis Name="Category2" Description="Secondary Y Axis Description"/>
+            </h:BarPlot.YAxis>
+            <h:BarPlot.Series>
+                <h:Series ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Series descrepancy relative to zero"/>
+                <h:Series ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
+                <h:Series ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>
+            </h:BarPlot.Series>
+            <h:BarPlot.ToolTipStyle>
+                <Style TargetType="h:SeriesPointToolTip">
+                    <Setter Property="Background" Value="Black"/>
+                    <Setter Property="Foreground" Value="Gray"/>
+                    <Setter Property="BorderBrush" Value="Gray"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Style>
+            </h:BarPlot.ToolTipStyle>
+        </h:BarPlot>
     </Grid>
 </Page>

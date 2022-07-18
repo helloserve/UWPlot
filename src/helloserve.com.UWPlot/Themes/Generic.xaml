@@ -3,10 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:helloserve.com.UWPlot">
 
-    <Style TargetType="local:LinePlot" >
+    <Style TargetType="local:Plot" >
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="local:LinePlot">
+                <ControlTemplate TargetType="local:Plot">
                     <Grid
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
