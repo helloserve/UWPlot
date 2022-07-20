@@ -28,6 +28,39 @@ namespace helloserve.com.UWPlot
             new SolidColorBrush(Colors.LightSeaGreen)
         };
 
+        private Brush plotAreaStrokeBrush = new SolidColorBrush(Colors.Gray);
+        public Brush PlotAreaStrokeBrush
+        {
+            get { return plotAreaStrokeBrush; }
+            set
+            {
+                plotAreaStrokeBrush = value;
+                Invalidate();
+            }
+        }
+
+        private double plotAreaStrokeThickness = 2;
+        public double PlotAreaStrokeThickness
+        {
+            get { return plotAreaStrokeThickness; }
+            set 
+            { 
+                plotAreaStrokeThickness = value;
+                Invalidate();
+            }
+        }
+
+        private double gridLineStrokeThickness = 0.5;
+        public double GridLineStrokeThickness
+        {
+            get { return gridLineStrokeThickness; }
+            set
+            {
+                gridLineStrokeThickness = value;
+                Invalidate();
+            }
+        }
+
         protected Grid LayoutRoot = null;
         protected SeriesPointToolTip ToolTip { get; set; } = new SeriesPointToolTip();
 
@@ -439,22 +472,15 @@ namespace helloserve.com.UWPlot
 
         protected virtual void DrawPlotArea()
         {
-            SolidColorBrush plotAreaStroke = new SolidColorBrush(Colors.Gray);
-            SolidColorBrush plotAreaStrokeDebug = new SolidColorBrush(Colors.Red);
-            SolidColorBrush plotAreaStrokeDebug1 = new SolidColorBrush(Colors.Green);
-            double plotAreaStrokeThickness = 2;
+            LayoutRoot.DrawLine(PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameTopLeft.Y, PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameTopLeft.Y, PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
 
-            double gridLineStrokeThickness = 0.5;
-
-            LayoutRoot.DrawLine(PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameTopLeft.Y, PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameTopLeft.Y, PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, plotAreaStroke, plotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
 
             for (int i = 0; i < PlotExtents.NumberOfScaleLines; i++)
             {
@@ -464,7 +490,7 @@ namespace helloserve.com.UWPlot
                 double x2 = PlotExtents.PlotFrameBottomRight.X;
                 double y2 = y1;
 
-                LayoutRoot.DrawLine(x1, y1, x2, y2, plotAreaStroke, plotAreaStrokeThickness);
+                LayoutRoot.DrawLine(x1, y1, x2, y2, PlotAreaStrokeBrush, PlotAreaStrokeThickness);
             }
 
             foreach (YAxis axis in YAxis)
@@ -487,7 +513,7 @@ namespace helloserve.com.UWPlot
             double lineStepX = PlotExtents.VerticalGridLineSpace + PlotExtents.PlotAreaTopLeft.X;
             for (int i = 0; i < PlotExtents.VerticalGridLineCount; i++)
             {
-                LayoutRoot.DrawLine(lineStepX, PlotExtents.PlotFrameTopLeft.Y, lineStepX, PlotExtents.PlotFrameBottomRight.Y, plotAreaStroke, gridLineStrokeThickness);
+                LayoutRoot.DrawLine(lineStepX, PlotExtents.PlotFrameTopLeft.Y, lineStepX, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, GridLineStrokeThickness);
                 LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
 
                 lineStepX += PlotExtents.VerticalGridLineSpace;

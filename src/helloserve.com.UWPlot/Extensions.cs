@@ -98,13 +98,19 @@ namespace helloserve.com.UWPlot
         /// <param name="fontSize"></param>
         /// <param name="limitedToWidth"></param>
         /// <param name="limitedToHeight"></param>
-        public static void DrawPlotValueItem(this Panel layoutRoot, string value, double x, double y, double fontSize, Rect plotArea, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        public static void DrawPlotValueItem(this Panel layoutRoot, string value, double x, double y, double fontSize, Rect plotArea, DataPointLocation offset = DataPointLocation.Below, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
-            layoutRoot.DrawString(value, fontSize, size => 
+            layoutRoot.DrawString(value, fontSize, size =>
             {
                 double offsetPadding = 0.2D;
                 var plotX = x - size.Width / 2 * paddingFactor;
-                var plotY = y + size.Height;
+                var plotY = y;
+                switch(offset) 
+                {
+                    case DataPointLocation.Above: plotY -= size.Height;break;
+                    case DataPointLocation.Below: plotY += size.Height;break;
+                    default: break;
+                }
                 if (plotX < plotArea.X)
                 {
                     plotX = plotArea.X + size.Width * offsetPadding;
