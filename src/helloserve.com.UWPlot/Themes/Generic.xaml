@@ -7,12 +7,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:Plot">
-                    <Grid
+                    <Canvas
                         Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
                         IsHitTestVisible="True">
-                    </Grid>
+                    </Canvas>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -62,12 +62,12 @@ namespace helloserve.com.UWPlot
             if (string.IsNullOrEmpty(ValueName) || string.IsNullOrEmpty(CategoryName))
             {
                 ItemsCollection = null;
-                return new SeriesMetaData();
+                return SeriesMetaData.Empty;
             }
 
             var type = dataContext.GetType();
 
-            if (contextType is null || type != contextType)
+            if (contextType is null || type != contextType || sourceProperty is null)
             {
                 contextType = type;
 
@@ -155,5 +155,7 @@ namespace helloserve.com.UWPlot
         public double? ValueMin { get; set; }
         public double? ValueMax { get; set; }
         public string LongestCategory { get; set; }
+
+        public static SeriesMetaData Empty => new SeriesMetaData();
     }
 }

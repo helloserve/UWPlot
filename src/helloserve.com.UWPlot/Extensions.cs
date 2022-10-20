@@ -55,7 +55,7 @@ namespace helloserve.com.UWPlot
             return textBlock.DesiredSize;
         }
 
-        public static void DrawLine(this Panel layoutRoot, double x1, double y1, double x2, double y2, Brush strokeColor, double strokeThickness)
+        public static void DrawLine(this Canvas layoutRoot, double x1, double y1, double x2, double y2, Brush strokeColor, double strokeThickness)
         {
             var line = new Line();
             line.X1 = x1;
@@ -68,7 +68,7 @@ namespace helloserve.com.UWPlot
             layoutRoot.Children.Add(line);
         }
 
-        public static void DrawCategoryItem(this Panel layoutRoot, string category, double x, double y, double fontSize, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        public static void DrawCategoryItem(this Canvas layoutRoot, string category, double x, double y, double fontSize, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             layoutRoot.DrawString(category, fontSize, size => new Thickness(x - (size.Width / 2), y + size.FactorDifference(paddingFactor).Height, 0, 0), paddingFactor, transform);
         }
@@ -83,7 +83,7 @@ namespace helloserve.com.UWPlot
         /// <param name="fontSize"></param>
         /// <param name="limitedToWidth"></param>
         /// <param name="limitedToHeight"></param>
-        public static void DrawScaleValueItem(this Panel layoutRoot, string value, double x, double y, double fontSize, YAxis.YAxisType type, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        public static void DrawScaleValueItem(this Canvas layoutRoot, string value, double x, double y, double fontSize, YAxis.YAxisType type, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             layoutRoot.DrawString(value, fontSize, size => new Thickness(type == YAxis.YAxisType.Primary ? x - size.Width * paddingFactor : x + size.FactorDifference(paddingFactor).Width, y - (size.Height / 2), 0, 0), paddingFactor, transform);
         }
@@ -98,7 +98,7 @@ namespace helloserve.com.UWPlot
         /// <param name="fontSize"></param>
         /// <param name="limitedToWidth"></param>
         /// <param name="limitedToHeight"></param>
-        public static void DrawPlotValueItem(this Panel layoutRoot, string value, double x, double y, double fontSize, Rect plotArea, DataPointLocation offset = DataPointLocation.Below, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        public static void DrawPlotValueItem(this Canvas layoutRoot, string value, double x, double y, double fontSize, Rect plotArea, DataPointLocation offset = DataPointLocation.Below, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             layoutRoot.DrawString(value, fontSize, size =>
             {
@@ -108,7 +108,7 @@ namespace helloserve.com.UWPlot
                 switch(offset) 
                 {
                     case DataPointLocation.Above: plotY -= size.Height;break;
-                    case DataPointLocation.Below: plotY += size.Height;break;
+                    case DataPointLocation.Below: plotY += size.Height * 0.1D;break;
                     default: break;
                 }
                 if (plotX < plotArea.X)
@@ -143,7 +143,7 @@ namespace helloserve.com.UWPlot
         /// <param name="limitedToWidth"></param>
         /// <param name="limitedToHeight"></param>
         /// <returns>A <see cref="Windows.Foundation.Size"/> object of the textblock that was created, so that subsequent legend items can be offset correctly.</returns>
-        public static Size DrawLegendItem(this Panel layoutRoot, string value, double x, double y, double fontSize, double indicatorWidth, SolidColorBrush color, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        public static Size DrawLegendItem(this Canvas layoutRoot, string value, double x, double y, double fontSize, double indicatorWidth, Brush color, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             Size descriptionSize = layoutRoot.DrawString(value, fontSize, size => new Thickness(x, y, 0, 0), paddingFactor, transform);
 
@@ -162,7 +162,7 @@ namespace helloserve.com.UWPlot
             return new Size(descriptionSize.Width + indicatorWidth + 40, descriptionSize.Height);
         }
 
-        private static Size DrawString(this Panel layoutRoot, string value, double fontSize, Func<Size, Thickness> positionFunc, double paddingFactor, Transform transform, double? limitedToWidth = null, double? limitedToHeight = null)
+        private static Size DrawString(this Canvas layoutRoot, string value, double fontSize, Func<Size, Thickness> positionFunc, double paddingFactor, Transform transform, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             var textBlock = new TextBlock();
             textBlock.Text = value;

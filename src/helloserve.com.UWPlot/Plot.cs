@@ -10,6 +10,11 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
+using System.Threading;
+
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace helloserve.com.UWPlot
 {
@@ -21,11 +26,26 @@ namespace helloserve.com.UWPlot
         public Style ToolTipStyle { get; set; }
         public double PaddingFactor { get; set; } = 1;
 
-        public List<SolidColorBrush> PlotColors = new List<SolidColorBrush>()
+        public PlotColorsCollection PlotColors = new PlotColorsCollection()
         {
-            new SolidColorBrush(Colors.PowderBlue),
-            new SolidColorBrush(Colors.PaleVioletRed),
-            new SolidColorBrush(Colors.LightSeaGreen)
+            Items = new List<PlotColorItem>()
+            {
+                new PlotColorItem()
+                {
+                    StrokeBrush = new SolidColorBrush(Colors.PowderBlue),
+                    FillBrush = new SolidColorBrush(Colors.PowderBlue)
+                },
+                new PlotColorItem()
+                {
+                    StrokeBrush = new SolidColorBrush(Colors.PaleVioletRed),
+                    FillBrush = new SolidColorBrush(Colors.PaleVioletRed)
+                },
+                new PlotColorItem()
+                {
+                    StrokeBrush = new SolidColorBrush(Colors.LightSeaGreen),
+                    FillBrush = new SolidColorBrush(Colors.LightSeaGreen)
+                }
+            }
         };
 
         private Brush plotAreaStrokeBrush = new SolidColorBrush(Colors.Gray);
@@ -35,7 +55,6 @@ namespace helloserve.com.UWPlot
             set
             {
                 plotAreaStrokeBrush = value;
-                Invalidate();
             }
         }
 
@@ -46,7 +65,6 @@ namespace helloserve.com.UWPlot
             set 
             { 
                 plotAreaStrokeThickness = value;
-                Invalidate();
             }
         }
 
@@ -57,17 +75,21 @@ namespace helloserve.com.UWPlot
             set
             {
                 gridLineStrokeThickness = value;
-                Invalidate();
             }
         }
 
-        protected Grid LayoutRoot = null;
+        protected Canvas LayoutRoot = null;
         protected SeriesPointToolTip ToolTip { get; set; } = new SeriesPointToolTip();
 
         internal DataExtents DataExtents = new DataExtents();
         internal PlotExtents PlotExtents = new PlotExtents();
 
-        private List<Tuple<Point, SeriesDataPoint>>[] SeriesDataPoints = null;
+        private SeriesDrawDataPoints[] SeriesDataPoints = null;
+
+        private SemaphoreSlim layoutLock = new SemaphoreSlim(4);
+        private bool hasDrawn = false;
+
+        private Exception dataPrepException;
 
         public Plot()
         {
@@ -80,20 +102,109 @@ namespace helloserve.com.UWPlot
             IsHitTestVisible = true;
         }
 
-        protected virtual void Plot_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void Plot_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Invalidate();
+#if DEBUG
+            Debug.WriteLine("Plot Size Changed");
+#endif
+            hasDrawn = false;
+            InvalidateMeasure();
+        }
+
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            layoutLock.Wait();
+
+            try
+            {
+
+                if (LayoutRoot == null)
+                    return availableSize;
+
+#if DEBUG
+                Debug.WriteLine("Measure Override");
+#endif
+
+                if (!DataExtents.IsPrepared)
+                {
+                    PrepareData(DataExtents);
+                }
+
+                Size measuredSize = MeasurePlot(availableSize);
+
+                return measuredSize;
+            }
+            catch(Exception ex)
+            {
+#if DEBUG
+                Debug.WriteLine("Error measuring");
+#endif
+                throw;
+            }
+            finally
+            {
+                layoutLock.Release();
+            }
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            layoutLock.Wait();
+            try
+            {
+                if (LayoutRoot == null)
+                    return finalSize;
+
+#if DEBUG
+                Debug.WriteLine("Arrange Override");
+#endif
+
+                if (!hasDrawn)
+                {
+                    Draw();
+                }
+                else
+                {
+#if DEBUG
+                    Debug.WriteLine($"Not drawing, already busy");
+#endif
+                }
+
+#if DEBUG
+                Debug.WriteLine($"Layout Children Count: {LayoutRoot.Children.Count}");
+#endif
+
+                return base.ArrangeOverride(finalSize);
+            }
+            finally
+            {
+                layoutLock.Release();
+            }            
+        }
+
+        private void ClearLayout()
+        {
+#if DEBUG
+            Debug.WriteLine("Clear Layout");
+#endif            
+            SeriesDataPoints = null;
+
+            LayoutRoot.Children.Clear();
         }
 
         protected virtual void Plot_Loaded(object sender, RoutedEventArgs e)
         {
-            LayoutRoot = (Grid)VisualTreeHelper.GetChild(this, 0);
+            LayoutRoot = (Canvas)VisualTreeHelper.GetChild(this, 0);
             LayoutRoot.PointerMoved += LayoutRoot_PointerMoved;
             LayoutRoot.PointerExited += LayoutRoot_PointerExited;
             ToolTip.Visibility = Visibility.Collapsed;
             ToolTip.Style = ToolTipStyle;
 
-            Layout();
+#if DEBUG
+            Debug.WriteLine("Loaded");
+#endif            
+            hasDrawn = true;
+            InvalidateMeasure();
         }
 
         private void LayoutRoot_PointerExited(object sender, PointerRoutedEventArgs e)
@@ -134,12 +245,12 @@ namespace helloserve.com.UWPlot
             ToolTip.Visibility = Visibility.Visible;
 
             //find the point closest to x
-            List<Tuple<Point, SeriesDataPoint>> seriesPoints = SeriesDataPoints[0];
+            SeriesDrawDataPoints seriesPoints = SeriesDataPoints[0];
             int closestX = int.MaxValue;
             int index = -1;
-            for (int i = 0; i < seriesPoints.Count; i++)
+            for (int i = 0; i < seriesPoints.SeriesDataPoints.Count; i++)
             {
-                var point = seriesPoints[i];
+                var point = seriesPoints.SeriesDataPoints[i];
                 int diffX = Math.Abs((int)Math.Round(point.Item1.X - x));
                 if (diffX < closestX)
                 {
@@ -154,11 +265,11 @@ namespace helloserve.com.UWPlot
             for (int i = 0; i < SeriesDataPoints.Length; i++)
             {
                 Series series = Series[i];
-                List<Tuple<Point, SeriesDataPoint>> points = SeriesDataPoints[i];
+                SeriesDrawDataPoints points = SeriesDataPoints[i];
                 _ = stringBuilder
                     .Append(series.LegendDescription)
                     .Append(": ")
-                    .Append(points[index].Item2.ValueText);
+                    .Append(points.SeriesDataPoints[index].Item2.ValueText);
 
                 if (i < SeriesDataPoints.Length - 1)
                 {
@@ -169,7 +280,7 @@ namespace helloserve.com.UWPlot
             ToolTip.SetDebugText(stringBuilder.ToString());
             //toolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}\r\nMargin: ({Math.Round(toolTip.Margin.Left)},{Math.Round(toolTip.Margin.Top)})x({Math.Round(toolTip.Margin.Right)},{Math.Round(toolTip.Margin.Bottom)})\r\nPlotArea: ({Math.Round(plotAreaTopLeft.X)},{Math.Round(plotAreaTopLeft.Y)})x({Math.Round(plotAreaBottomRight.X)},{Math.Round(plotAreaBottomRight.Y)})");
 
-            Invalidate();
+            InvalidateArrange();
         }
 
         protected virtual void Plot_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
@@ -191,30 +302,13 @@ namespace helloserve.com.UWPlot
 
         private void ContextNotify_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            PrepareData(DataExtents);
-            Invalidate();
-        }
+#if DEBUG
+            Debug.WriteLine("Data Changed");
+#endif
+            DataExtents.IsPrepared = false;
 
-        protected virtual void Invalidate()
-        {
-            SeriesDataPoints = null;
-            Layout();
-            InvalidateArrange();
-        }
-
-        private void Layout()
-        {
-            if (LayoutRoot is null)
-            {
-                return;
-            }
-
-            LayoutRoot.Children.Clear();
-
-            if (ValidateSeries())
-            {
-                Draw();
-            }
+            hasDrawn = false;
+            InvalidateMeasure();
         }
 
         internal virtual void PrepareData(DataExtents extents)
@@ -229,25 +323,36 @@ namespace helloserve.com.UWPlot
                 return;
             }
 
-            foreach (Series series in Series)
+            dataPrepException = null;
+
+            try
             {
-                SeriesMetaData meta = series.PrepareData(DataContext);
-
-                if (!extents.ValueMin.HasValue || meta.ValueMin < extents.ValueMin)
+                foreach (Series series in Series)
                 {
-                    extents.ValueMin = meta.ValueMin;
+                    SeriesMetaData meta = series.PrepareData(DataContext);
+
+                    if (!extents.ValueMin.HasValue || meta.ValueMin < extents.ValueMin)
+                    {
+                        extents.ValueMin = meta.ValueMin;
+                    }
+
+                    if (!extents.ValueMax.HasValue || meta.ValueMax > extents.ValueMax)
+                    {
+                        extents.ValueMax = meta.ValueMax;
+                        extents.ValueMaxString = extents.ValueMax.FormatObject(series.ValueFormat);
+                    }
+
+                    if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory.Length > extents.LongestCategory.Length)
+                    {
+                        extents.LongestCategory = meta.LongestCategory;
+                    }
                 }
 
-                if (!extents.ValueMax.HasValue || meta.ValueMax > extents.ValueMax)
-                {
-                    extents.ValueMax = meta.ValueMax;
-                    extents.ValueMaxString = extents.ValueMax.FormatObject(series.ValueFormat);
-                }
-
-                if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory.Length > extents.LongestCategory.Length)
-                {
-                    extents.LongestCategory = meta.LongestCategory;
-                }
+                extents.IsPrepared = true;
+            }
+            catch (Exception ex)
+            {
+                dataPrepException = ex;
             }
         }
 
@@ -255,67 +360,75 @@ namespace helloserve.com.UWPlot
         {
             string message = null;
 
-            if (Series is null || Series.Count == 0 || Series.Any(x => x.ItemsDataPoints is null) || Series.Any(x => x.ItemsDataPoints.Count == 0))
+            if (dataPrepException != null)
             {
-                message = "No series defined or series is empty.";
+                message = dataPrepException.Message;
+            }
+            else
+            {
 
-                if (Series != null)
+                if (Series is null || Series.Count == 0 || Series.Any(x => x.ItemsDataPoints is null) || Series.Any(x => x.ItemsDataPoints.Count == 0))
                 {
-                    message = string.Empty;
-                    foreach (var series in Series)
+                    message = "No series defined or series is empty.";
+
+                    if (Series != null)
                     {
-                        if (series.ItemsDataPoints is null || series.ItemsDataPoints.Count == 0)
+                        message = string.Empty;
+                        foreach (var series in Series)
                         {
-                            message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} is not defined or empty.";
+                            if (series.ItemsDataPoints is null || series.ItemsDataPoints.Count == 0)
+                            {
+                                message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} is not defined or empty.";
+                            }
                         }
                     }
                 }
-            }
 
-            //exit here to prevent a slew of null-checks below
-            if (!string.IsNullOrEmpty(message))
-            {
-                return false;
-            }
-
-            if (Series.Select(x => x.ItemsDataPoints.Count).Distinct().Count() > 1)
-            {
-                message = "There are different number of data points in the different series. These have to match. Provide null values for the catogories that are missing.";
-            }
-
-            for (int i = 0; i < Series[0].ItemsDataPoints.Count; i++)
-            {
-                string category = Series[0].ItemsDataPoints[i].Category;
-                foreach (var series in Series)
+                //exit here to prevent a slew of null-checks below
+                if (!string.IsNullOrEmpty(message))
                 {
-                    if (!series.ItemsDataPoints[i].Category.Equals(category))
+                    return false;
+                }
+
+                if (Series.Select(x => x.ItemsDataPoints.Count).Distinct().Count() > 1)
+                {
+                    message = "There are different number of data points in the different series. These have to match. Provide null values for the catogories that are missing.";
+                }
+
+                for (int i = 0; i < Series[0].ItemsDataPoints.Count; i++)
+                {
+                    string category = Series[0].ItemsDataPoints[i].Category;
+                    foreach (var series in Series)
                     {
-                        message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} has category {series.ItemsDataPoints[i].Category} which does not match the first or primary series in position {i}.";
+                        if (!series.ItemsDataPoints[i].Category.Equals(category))
+                        {
+                            message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} has category {series.ItemsDataPoints[i].Category} which does not match the first or primary series in position {i}.";
+                        }
                     }
                 }
-            }
 
-            if (YAxis.Count == 0)
-            {
-                YAxis.Add(new YAxis());
-            }
-
-            if (YAxis.Count(x => x.AxisType == UWPlot.YAxis.YAxisType.Primary) > 1)
-            {
-                if (YAxis.Count == 2)
+                if (YAxis.Count == 0)
                 {
-                    YAxis[0].AxisType = UWPlot.YAxis.YAxisType.Primary;
-                    YAxis[1].AxisType = UWPlot.YAxis.YAxisType.Secondary;
+                    YAxis.Add(new YAxis());
                 }
-                else
-                {
-                    message = "More than one primary y axis is defined. A graph can have only one primary y-axis, and an optional secondary y-axis";
-                }
-            }
 
-            if (string.IsNullOrEmpty(message))
-            {
-                return true;
+                if (YAxis.Count(x => x.AxisType == UWPlot.YAxis.YAxisType.Primary) > 1)
+                {
+                    if (YAxis.Count == 2)
+                    {
+                        YAxis[0].AxisType = UWPlot.YAxis.YAxisType.Primary;
+                        YAxis[1].AxisType = UWPlot.YAxis.YAxisType.Secondary;
+                    }
+                    else
+                    {
+                        message = "More than one primary y axis is defined. A graph can have only one primary y-axis, and an optional secondary y-axis";
+                    }
+                }
+
+                if (string.IsNullOrEmpty(message))
+                {
+                    return true;
+                }
             }
 
             LayoutRoot.Children.Add(new Line()
@@ -350,27 +463,40 @@ namespace helloserve.com.UWPlot
 
         protected void Draw()
         {
-            if (double.IsNaN(ActualWidth) || double.IsNaN(ActualHeight))
-            {
-                LayoutRoot.Children.Add(new TextBlock()
-                {
-                    Text = "Plot layout not complete.",
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                });
+#if DEBUG
+            Debug.WriteLine("Draw");
+#endif
 
+            if (LayoutRoot == null)
                 return;
-            }
 
-            Measure();
+            if (!ValidateSeries())
+                return;
+
+            ClearLayout();
             DrawPlotArea();
             DrawSeriesInternal();
 
+#if DEBUG
+            Debug.WriteLine("Draw Complete");
+#endif
+
             LayoutRoot.Children.Add(ToolTip);
+
+#if DEBUG
+            Debug.WriteLine("ToolTip Added");
+#endif
+            hasDrawn = true;
         }
 
-        protected virtual void Measure()
+        protected virtual Size MeasurePlot(Size availableSize)
         {
+            if (!DataExtents.IsPrepared)
+                return availableSize;
+
+            double actualWidth = availableSize.Width;
+            double actualHeight = availableSize.Height;
+
             //legend
             double maxLegendWidth = 0;
             double legendHeight = 0;
@@ -397,8 +523,8 @@ namespace helloserve.com.UWPlot
 
             PlotExtents.LegendItemIndicatorWidth = legendHeight;
             legendWidth += Series.Count * (40 + PlotExtents.LegendItemIndicatorWidth);
-            PlotExtents.LegendAreaTopLeft = new Point(ActualWidth * 0.5 - (legendWidth * 0.5), Padding.Top);
-            PlotExtents.LegendAreaBottomRight = new Point(ActualWidth * 0.5 + (legendWidth * 0.5), Padding.Top + legendHeight);
+            PlotExtents.LegendAreaTopLeft = new Point(actualWidth * 0.5 - (legendWidth * 0.5), Padding.Top);
+            PlotExtents.LegendAreaBottomRight = new Point(actualWidth * 0.5 + (legendWidth * 0.5), Padding.Top + legendHeight);
 
             OnMeasureLegend();
 
@@ -407,7 +533,7 @@ namespace helloserve.com.UWPlot
             Size categoryTextMaxSize = DataExtents.LongestCategory.MeasureTextSize(FontSize, transform: XAxis.LabelTransform).WithFactor(PaddingFactor);
 
             PlotExtents.PlotFrameTopLeft = new Point(Padding.Left + Math.Max(valueTextMaxSize.Width, categoryTextMaxSize.Width / 2), Padding.Top + legendHeight);
-            PlotExtents.PlotFrameBottomRight = new Point(ActualWidth - Padding.Right - Math.Max(valueTextMaxSize.Width, categoryTextMaxSize.Width / 2), ActualHeight - Padding.Bottom - categoryTextMaxSize.Height - legendHeight);
+            PlotExtents.PlotFrameBottomRight = new Point(actualWidth - Padding.Right - Math.Max(valueTextMaxSize.Width, categoryTextMaxSize.Width / 2), actualHeight - Padding.Bottom - categoryTextMaxSize.Height - legendHeight);
 
             OnMeasurePlotFrame();
 
@@ -437,7 +563,7 @@ namespace helloserve.com.UWPlot
             double height = PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y;
             double minHeight = valueTextMaxSize.Height * 1.2;  //add 20% buffer area
             PlotExtents.NumberOfScaleLines = (int)(height / minHeight) / 2;
-            if (PlotExtents.NumberOfScaleLines % 10 != 0)
+            if (PlotExtents.NumberOfScaleLines % 10 != 0 && PlotExtents.NumberOfScaleLines > 10)
             {
                 PlotExtents.NumberOfScaleLines -= PlotExtents.NumberOfScaleLines % 10;
             }
@@ -448,8 +574,10 @@ namespace helloserve.com.UWPlot
             OnMeasurePrimaryYAxis();
 
             //secondary axis
+            bool hasSecondaryY = false;
             foreach (YAxis axis in YAxis.Except(new List<YAxis>() { primaryAxis }))
             {
+                hasSecondaryY = true;
                 primarySeries = Series.Where(x => x.AxisName == axis.Name).ToList();
                 if (!primarySeries.Any())
                     primarySeries = Series;
@@ -461,6 +589,12 @@ namespace helloserve.com.UWPlot
             }
 
             OnMeasureSecondaryYAxis();
+
+            Size measuredSize = new Size(
+                (PlotExtents.PlotFrameBottomRight.X + (hasSecondaryY ? valueTextMaxSize.Width : 0)) - (PlotExtents.PlotFrameTopLeft.X - valueTextMaxSize.Width),
+                (PlotExtents.LegendAreaBottomRight.Y - PlotExtents.LegendAreaTopLeft.Y) + (PlotExtents.PlotFrameBottomRight.Y - PlotExtents.PlotFrameTopLeft.Y) + categoryTextMaxSize.Height);
+
+            return new Size(Math.Max(availableSize.Width, measuredSize.Width), Math.Max(availableSize.Height, measuredSize.Height));
         }
 
         protected virtual void OnMeasureLegend() { }
@@ -472,15 +606,28 @@ namespace helloserve.com.UWPlot
 
         protected virtual void DrawPlotArea()
         {
+            if (!DataExtents.IsPrepared)
+                return;
+
+#if DEBUG
+            Debug.WriteLine("DrawPlotArea");
+#endif
+            double actualWidth = ActualWidth;
+            double actualHeight = ActualHeight;
+
             LayoutRoot.DrawLine(PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameTopLeft.Y, PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
             LayoutRoot.DrawLine(PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
             LayoutRoot.DrawLine(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
             LayoutRoot.DrawLine(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameTopLeft.Y, PlotExtents.PlotFrameTopLeft.X, PlotExtents.PlotFrameTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
 
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
-            LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            //LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            //LayoutRoot.DrawLine(PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            //LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaBottomRight.Y, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+            //LayoutRoot.DrawLine(PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, PlotAreaStrokeBrush, PlotAreaStrokeThickness * 1.25);
+
+#if DEBUG
+            Debug.WriteLine($"PlotExtents.NumberOfScaleLines: {PlotExtents.NumberOfScaleLines}");
+#endif
 
             for (int i = 0; i < PlotExtents.NumberOfScaleLines; i++)
             {
@@ -490,7 +637,10 @@ namespace helloserve.com.UWPlot
                 double x2 = PlotExtents.PlotFrameBottomRight.X;
                 double y2 = y1;
 
-                LayoutRoot.DrawLine(x1, y1, x2, y2, PlotAreaStrokeBrush, PlotAreaStrokeThickness);
+#if DEBUG
+                Debug.WriteLine($"ScaleLine: ({x1},{y1}) - ({x2},{y2})");
+#endif
+                LayoutRoot.DrawLine(x1, y1, x2, y2, PlotAreaStrokeBrush, GridLineStrokeThickness);
             }
 
             foreach (YAxis axis in YAxis)
@@ -524,13 +674,17 @@ namespace helloserve.com.UWPlot
             double legendX = (PlotExtents.LegendAreaBottomRight.X - PlotExtents.LegendAreaTopLeft.X) * 0.08D;
             foreach (Series series in Series)
             {
-                var drawSize = LayoutRoot.DrawLegendItem(series.LegendDescription, legendX + PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, FontSize, PlotExtents.LegendItemIndicatorWidth, PlotColors[Series.IndexOf(series)]);
+                var drawSize = LayoutRoot.DrawLegendItem(series.LegendDescription, legendX + PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, FontSize, PlotExtents.LegendItemIndicatorWidth, PlotColors[Series.IndexOf(series)].StrokeBrush);
                 legendX += drawSize.Width;
             }
         }
 
         private void DrawSeriesInternal()
         {
+#if DEBUG
+            Debug.WriteLine("DrawSeriesInternal");
+#endif
+
             if (SeriesDataPoints == null)
             {
                 SeriesDataPoints = CalculateSeriesDataPoints();
@@ -539,9 +693,9 @@ namespace helloserve.com.UWPlot
             DrawSeries(SeriesDataPoints);
         }
 
-        internal virtual List<Tuple<Point, SeriesDataPoint>>[] CalculateSeriesDataPoints()
+        internal virtual SeriesDrawDataPoints[] CalculateSeriesDataPoints()
         {
-            var seriesDataPoints = new List<Tuple<Point, SeriesDataPoint>>[Series.Count];
+            var seriesDataPoints = new SeriesDrawDataPoints[Series.Count];
 
             double plotHeight = PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y;
 
@@ -549,6 +703,8 @@ namespace helloserve.com.UWPlot
             {
                 YAxis axis = YAxis.SingleOrDefault(a => a.Name == series.AxisName);
                 axis = axis ?? YAxis.SingleOrDefault(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
+
+                Point axisZeroLine = new Point(0, PlotExtents.PlotAreaBottomRight.Y - (-axis.CalculatedMin) / axis.CalculateRange * plotHeight);
 
                 List<Tuple<Point, SeriesDataPoint>> linePlotPoints = new List<Tuple<Point, SeriesDataPoint>>();
 
@@ -570,16 +726,27 @@ namespace helloserve.com.UWPlot
                     linePlotPoints.Add(new Tuple<Point, SeriesDataPoint>(new Point(x, y), dataPoint));
                 }
 
-                seriesDataPoints[Series.IndexOf(series)] = linePlotPoints;
+                seriesDataPoints[Series.IndexOf(series)] = new SeriesDrawDataPoints()
+                {
+                    ZeroLine = axisZeroLine,
+                    SeriesDataPoints = linePlotPoints
+                };
             }
 
             return seriesDataPoints;
         }
 
 
-        internal virtual void DrawSeries(List<Tuple<Point, SeriesDataPoint>>[] seriesDataPoints)
+        internal virtual void DrawSeries(SeriesDrawDataPoints[] seriesDataPoints)
         {
 
         }
+    }
+
+    internal class SeriesDrawDataPoints
+    {
+        public Point ZeroLine { get; set; }
+        public List<Tuple<Point, SeriesDataPoint>> SeriesDataPoints { get; set; }
+
     }
 }
