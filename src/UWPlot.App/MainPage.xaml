@@ -23,7 +23,8 @@
             FontSize="15"
             DataContext="{x:Bind ViewModel}"
             PaddingFactor="1.2"
-            Padding="10">
+            Padding="10"
+            PlotColors="{ThemeResource PlotColors}">
             <h:LinePlot.XAxis>
                 <h:XAxis Description="X Axis Description">
                     <h:XAxis.LabelTransform>

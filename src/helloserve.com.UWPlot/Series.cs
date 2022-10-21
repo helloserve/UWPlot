@@ -42,6 +42,11 @@ namespace helloserve.com.UWPlot
         /// </summary>
         public double? PointBulletSize { get; set; }
 
+        /// <summary>
+        /// Controls whether the specific values are shown at the data points in the graph.
+        /// </summary>
+        public bool ShowDataPointValues { get; set; }
+
         private Type contextType;
         private PropertyInfo sourceProperty;
         private PropertyInfo valuePropertyInfo;

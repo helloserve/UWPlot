@@ -11,6 +11,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 using System.Threading;
+using Windows.UI.Xaml.Markup;
 
 #if DEBUG
 using System.Diagnostics;
@@ -18,15 +19,24 @@ using System.Diagnostics;
 
 namespace helloserve.com.UWPlot
 {
+    [ContentProperty(Name = "Series")]
     public abstract class Plot : Control
     {
+        public static readonly DependencyProperty PlotColorsProperty = DependencyProperty.Register("PlotColors", typeof(PlotColorsCollection), typeof(Plot), new PropertyMetadata(null, OnPlotColorsChanged));
+        private static void OnPlotColorsChanged(DependencyObject target, DependencyPropertyChangedEventArgs args)
+        {
+            Plot plot = target as Plot;
+            plot.plotColors = args.NewValue as PlotColorsCollection;
+        }
+
+
         public List<Series> Series { get; set; } = new List<Series>();
         public List<YAxis> YAxis { get; set; } = new List<YAxis>();
         public XAxis XAxis { get; set; } = new XAxis();
         public Style ToolTipStyle { get; set; }
         public double PaddingFactor { get; set; } = 1;
 
-        public PlotColorsCollection PlotColors = new PlotColorsCollection()
+        private PlotColorsCollection plotColors = new PlotColorsCollection()
         {
             Items = new List<PlotColorItem>()
             {
@@ -47,6 +57,12 @@ namespace helloserve.com.UWPlot
                 }
             }
         };
+
+        public PlotColorsCollection PlotColors
+        {
+            get => plotColors;
+            set => SetValue(PlotColorsProperty, value);
+        }
 
         private Brush plotAreaStrokeBrush = new SolidColorBrush(Colors.Gray);
         public Brush PlotAreaStrokeBrush
@@ -204,7 +220,14 @@ namespace helloserve.com.UWPlot
             Debug.WriteLine("Loaded");
 #endif            
             hasDrawn = true;
-            InvalidateMeasure();
+            try
+            {
+                InvalidateMeasure();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         private void LayoutRoot_PointerExited(object sender, PointerRoutedEventArgs e)
@@ -729,6 +752,7 @@ namespace helloserve.com.UWPlot
                 seriesDataPoints[Series.IndexOf(series)] = new SeriesDrawDataPoints()
                 {
                     ZeroLine = axisZeroLine,
+                    DrawValueItem = series.ShowDataPointValues,
                     SeriesDataPoints = linePlotPoints
                 };
             }
@@ -746,6 +770,7 @@ namespace helloserve.com.UWPlot
     internal class SeriesDrawDataPoints
     {
         public Point ZeroLine { get; set; }
+        public bool DrawValueItem { get; set; }
         public List<Tuple<Point, SeriesDataPoint>> SeriesDataPoints { get; set; }
 
     }

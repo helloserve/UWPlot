@@ -79,7 +79,10 @@ namespace helloserve.com.UWPlot
                         LayoutRoot.Children.Add(point);
                     }
 
-                    LayoutRoot.DrawPlotValueItem(linePlotPoints[i].Item2.ValueText, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, FontSize, new Rect(PlotExtents.PlotAreaTopLeft, PlotExtents.PlotAreaBottomRight), DataPointLocation.Below);
+                    if (series.ShowDataPointValues)
+                    {
+                        LayoutRoot.DrawPlotValueItem(linePlotPoints[i].Item2.ValueText, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, FontSize, new Rect(PlotExtents.PlotAreaTopLeft, PlotExtents.PlotAreaBottomRight), DataPointLocation.Below);
+                    }
                 }
             }
         }

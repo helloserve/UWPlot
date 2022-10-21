@@ -69,9 +69,12 @@ namespace helloserve.com.UWPlot
                     LayoutRoot.Children.Add(indicator);
                 }
             }
-
+            
             for (int s = 0; s < seriesDataPoints.Length; s++)
             {
+                if (!seriesDataPoints[s].DrawValueItem)
+                    continue;
+
                 var linePlotPoints = seriesDataPoints[s].SeriesDataPoints;                
                 double seriesXOffset = -barXOffset + (s * thickness) + (thickness / 2);
 

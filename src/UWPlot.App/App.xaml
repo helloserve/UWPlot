@@ -1,7 +1,16 @@
 ﻿<Application
     x:Class="UWPlot.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:UWPlot.App">
-
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/_Colors.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary Source="/Styles/_ColorsLight.xaml" x:Key="Light"/>
+                <ResourceDictionary Source="/Styles/_ColorsDark.xaml" x:Key="Dark"/>
+            </ResourceDictionary.ThemeDictionaries>        
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>
