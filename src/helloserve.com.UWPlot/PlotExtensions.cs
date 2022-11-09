@@ -8,7 +8,7 @@ using Windows.UI.Xaml.Shapes;
 
 namespace helloserve.com.UWPlot
 {
-    public static class Extensions
+    public static class PlotExtensions
     {
         public static string FormatObject(this object obj, string format)
         {
@@ -167,7 +167,8 @@ namespace helloserve.com.UWPlot
             var textBlock = new TextBlock();
             textBlock.Text = value;
             textBlock.FontSize = fontSize;
-            textBlock.RenderTransform = transform ?? new TranslateTransform();
+            if (transform != null)
+                textBlock.RenderTransform = transform;
 
             Size availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
             if (limitedToWidth.HasValue)

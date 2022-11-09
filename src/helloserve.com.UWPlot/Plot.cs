@@ -580,19 +580,12 @@ namespace helloserve.com.UWPlot
                 primarySeries = Series;
             }
 
-            double max = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Max(x => x.Value.Value);
-            double min = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Min(x => x.Value.Value);
-
             double height = PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y;
             double minHeight = valueTextMaxSize.Height * 1.2;  //add 20% buffer area
-            PlotExtents.NumberOfScaleLines = (int)(height / minHeight) / 2;
-            if (PlotExtents.NumberOfScaleLines % 10 != 0 && PlotExtents.NumberOfScaleLines > 10)
-            {
-                PlotExtents.NumberOfScaleLines -= PlotExtents.NumberOfScaleLines % 10;
-            }
-            PlotExtents.ScaleLineIncrements = height / PlotExtents.NumberOfScaleLines;
 
-            primaryAxis.Measure(max, min, PlotExtents.NumberOfScaleLines);
+            var extents = primaryAxis.Measure(primarySeries.Select(x => x.ItemsDataPoints).ToList(), height, minHeight);
+            PlotExtents.NumberOfScaleLines = extents.NumberOfScaleLines;
+            PlotExtents.ScaleLineIncrements = extents.ScaleLineIncrements;
 
             OnMeasurePrimaryYAxis();
 
@@ -605,8 +598,8 @@ namespace helloserve.com.UWPlot
                 if (!primarySeries.Any())
                     primarySeries = Series;
 
-                max = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Max(x => x.Value.Value);
-                min = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Min(x => x.Value.Value);
+                var max = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Max(x => x.Value.Value);
+                var min = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Min(x => x.Value.Value);
 
                 axis.Measure(max, min, PlotExtents.NumberOfScaleLines);
             }
@@ -671,7 +664,7 @@ namespace helloserve.com.UWPlot
                 Series series = Series.FirstOrDefault(s => s.AxisName == axis.Name);
                 for (int i = 0; i < axis.ScaleValues.Count; i++)
                 {
-                    double value = (axis.CalculatedIncrement * i) + axis.CalculatedMin;
+                    double value = axis.ScaleValues[i];
 
                     double x1 = PlotExtents.PlotFrameTopLeft.X;
                     double y1 = PlotExtents.PlotAreaBottomRight.Y - (i * PlotExtents.ScaleLineIncrements);

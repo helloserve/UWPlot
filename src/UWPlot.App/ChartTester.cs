@@ -11,6 +11,8 @@ namespace UWPlot.App
         public ObservableCollection<DataPoint> Data2 { get; } = new ObservableCollection<DataPoint>();
         public ObservableCollection<DataPoint> Data3 { get; } = new ObservableCollection<DataPoint>();
 
+        public ObservableCollection<LedgerPoint> Data4 { get; } = new ObservableCollection<LedgerPoint>();
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Initialize()
@@ -50,6 +52,19 @@ namespace UWPlot.App
                 .ForEach(x => Data3.Add(x));
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data3)));
+
+            Data4.Add(new LedgerPoint() { Category = "Ledger 1", Name = "Data4-1", Value = 4500 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 2", Name = "Data4-2", Value = 3400 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 3", Name = "Data4-3", Value = 65890 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 4", Name = "Data4-4", Value = 24000 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 5", Name = "Data4-5", Value = 15000 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data4-6", Value = 9000 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data4-7", Value = 2500 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data4-8", Value = 1000 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data4-9", Value = 1000 });
+            Data4.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data4-10", Value = 3400 });
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data4)));
         }
 
         private static double Evaluate(int x, Func<int, double> multiplier, Func<double, double> equation)
@@ -63,5 +78,12 @@ namespace UWPlot.App
         public double Value { get; set; }
         public string Name { get; set; }
         public DateTime Category { get; set; }
+    }
+
+    public class LedgerPoint
+    {
+        public double Value { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
     }
 }

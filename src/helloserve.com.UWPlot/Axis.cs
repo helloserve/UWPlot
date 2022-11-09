@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Windows.UI.Xaml.Media;
 
 namespace helloserve.com.UWPlot
@@ -19,7 +20,7 @@ namespace helloserve.com.UWPlot
         /// <summary>
         /// A transform that will be applied to each increment label on the axis
         /// </summary>
-        public Transform LabelTransform { get; set; } = new TranslateTransform();
+        public Transform LabelTransform { get; set; }
     }
 
     public class XAxis : Axis
@@ -66,6 +67,12 @@ namespace helloserve.com.UWPlot
 
         public double CalculateRange => CalculatedMax - CalculatedMin;
 
+        /// <summary>
+        /// Measures and divides the axis based on a predetermined number of grid lines.
+        /// </summary>
+        /// <param name="seriesMaxValue"></param>
+        /// <param name="seriesMinValue"></param>
+        /// <param name="numberOfLines"></param>
         public void Measure(double seriesMaxValue, double seriesMinValue, int numberOfLines)
         {
             if (Min.HasValue)
@@ -74,10 +81,11 @@ namespace helloserve.com.UWPlot
             }
             else
             {
+                double magnitude = 0;
                 if (seriesMinValue < 0)
-                    CalculatedMin = CalculateUpperBound(seriesMinValue);
+                    CalculatedMin = seriesMinValue.CalculateUpperBound(out magnitude);
                 else
-                    CalculatedMin = CalculateLowerBound(seriesMinValue);
+                    CalculatedMin = seriesMinValue.CalculateLowerBound(out magnitude);
             }
 
             if (Max.HasValue)
@@ -86,10 +94,11 @@ namespace helloserve.com.UWPlot
             }
             else
             {
+                double magnitude = 0;
                 if (seriesMaxValue < 0)
-                    CalculatedMax = CalculateLowerBound(seriesMaxValue);
+                    CalculatedMax = seriesMaxValue.CalculateLowerBound(out magnitude);
                 else
-                    CalculatedMax = CalculateUpperBound(seriesMaxValue);
+                    CalculatedMax = seriesMaxValue.CalculateUpperBound(out magnitude);
             }
 
             if (Increment.HasValue)
@@ -105,44 +114,134 @@ namespace helloserve.com.UWPlot
 
             for (int i = 0; i < numberOfLines + 1; i++)
             {
-                ScaleValues.Add(CalculatedMin + (i * CalculatedIncrement));
+                ScaleValues.Add(Math.Round((CalculatedMax - CalculatedMin) * ((double)i / (double)numberOfLines) + CalculatedMin));
             }
         }
 
-        private double CalculateUpperBound(double value)
+        /// <summary>
+        /// Calculate the optimal amount and increment for grid lines and measures the axis accordingly. Returns the grid lines result as a partial extents object.
+        /// </summary>
+        /// <param name="seriesMaxValue"></param>
+        /// <param name="seriesMinValue"></param>
+        /// <param name="height"></param>
+        /// <param name="minHeight"></param>
+        /// <returns></returns>
+        internal PlotExtents Measure(List<List<SeriesDataPoint>> series, double height, double minHeight)
         {
-            var whole = Math.Abs((int)value);
-            var magnitude = Math.Pow(10, Math.Max(1, whole.ToString().Length));
-
-            var bound = Math.Truncate(value / magnitude) * magnitude;
-
-            while (Math.Abs(bound) < Math.Abs(value))
+            int mostDifferenceOccurance = 0;
+            double mostDifference = 0;
+            int mostMagnitudeOccurance = 0;
+            double mostMagnitude = 0;
+            List<Dictionary<double, int>> seriesDifferencesRounded = new List<Dictionary<double, int>>();
+            List<Dictionary<double, int>> seriesMagnitudes = new List<Dictionary<double, int>>();
+            for (int i = 0; i < series.Count; i++)
             {
-                magnitude /= 10;
-                bound = Math.Round(value / magnitude) * magnitude;
-            }
-
-            return bound;
-        }
-
-        private double CalculateLowerBound(double val)
-        {
-            var whole = Math.Abs((int)val);
-            var magnitude = Math.Pow(10, Math.Max(1, whole.ToString().Length - 1));
-
-            var bound = Math.Round(val / magnitude) * magnitude;
-
-            while (Math.Abs(bound) > Math.Abs(val))
-            {
-                magnitude /= 10;
-                bound = Math.Round(val / magnitude) * magnitude;
-                if (Math.Abs(bound) < 100 && Math.Abs(bound) > -100)
+                seriesDifferencesRounded.Add(new Dictionary<double, int>());
+                seriesMagnitudes.Add(new Dictionary<double, int>());
+                for (int p = 1; p < series[i].Count - 1; p++)
                 {
-                    bound = 0;
+                    var difference = Math.Abs(series[i][p].Value.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
+                    var roundedDifference = difference.CalculateUpperBound(out double magnitude);
+                    if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
+                        seriesDifferencesRounded[i][roundedDifference]++;
+                    else
+                        seriesDifferencesRounded[i].Add(roundedDifference, 1);
+
+                    if (seriesMagnitudes[i].ContainsKey(magnitude))
+                        seriesMagnitudes[i][magnitude]++;
+                    else
+                        seriesMagnitudes[i].Add(magnitude, 1);
+                }
+
+                foreach (var key in seriesDifferencesRounded[i].Keys)
+                {
+                    if (seriesDifferencesRounded[i][key] > mostDifferenceOccurance)
+                    {
+                        mostDifferenceOccurance = seriesDifferencesRounded[i][key];
+                        mostDifference = key;
+                    }
+                }
+                foreach (var key in seriesMagnitudes[i].Keys)
+                {
+                    if (seriesMagnitudes[i][key] > mostMagnitudeOccurance)
+                    {
+                        mostMagnitudeOccurance = seriesMagnitudes[i][key];
+                        mostMagnitude = key;
+                    }
                 }
             }
 
-            return bound;
+            var allValues = series.SelectMany(x => x.Where(s => s.Value.HasValue).Select(s => s.Value.GetValueOrDefault())).ToList();
+            double seriesMinValue = allValues.Min();
+            double seriesMaxValue = allValues.Max();
+
+            double minMagnitude = 0;
+            double maxMagnitude = 0;
+            if (Min.HasValue)
+            {
+                CalculatedMin = Min.Value;
+            }
+            else
+            {
+                if (seriesMinValue < 0)
+                    CalculatedMin = seriesMinValue.CalculateUpperBound(out minMagnitude);
+                else
+                    CalculatedMin = seriesMinValue.CalculateLowerBound(out minMagnitude);
+            }
+
+            if (Max.HasValue)
+            {
+                CalculatedMax = Max.Value;
+            }
+            else
+            {
+                if (seriesMaxValue < 0)
+                    CalculatedMax = seriesMaxValue.CalculateLowerBound(out maxMagnitude);
+                else
+                    CalculatedMax = seriesMaxValue.CalculateUpperBound(out maxMagnitude);
+            }
+
+            if (maxMagnitude > minMagnitude)
+            {
+                if (CalculatedMin > 0)
+                    CalculatedMin = 0;
+                //we can't really increase the magnitude, since the lower bound can't go higher, so best to just make it zero.
+            }
+            else if (minMagnitude > maxMagnitude && CalculatedMax != 0)
+            {
+                CalculatedMax = minMagnitude * (CalculatedMax / Math.Abs(CalculatedMax));
+            }
+
+
+            CalculatedIncrement = mostMagnitude;
+            int numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+
+            int scaleLinesCount = (int)(height / minHeight) / 2;
+
+            while (numberOfLines > scaleLinesCount)
+            {
+                if (numberOfLines / scaleLinesCount / 10 > 0)
+                    CalculatedIncrement *= 10;
+                else
+                    CalculatedIncrement *= 2;
+
+                numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+            }
+
+            double heightIncrements = height / numberOfLines;
+
+            ScaleValues = new List<double>();
+
+            for (int i = 0; i < numberOfLines + 1; i++)
+            {
+                ScaleValues.Add(CalculatedIncrement * i + CalculatedMin);
+            }
+
+            return new PlotExtents()
+            {
+                NumberOfScaleLines = numberOfLines,
+                ScaleLineIncrements = heightIncrements
+            };
         }
 
         public enum YAxisType

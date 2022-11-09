@@ -17,7 +17,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <h:LinePlot 
+        <!--<h:LinePlot 
             Grid.Column="0"
             Grid.Row="0"
             FontSize="15"
@@ -29,8 +29,8 @@
                 <h:XAxis Description="X Axis Description">
                     <h:XAxis.LabelTransform>
                         <TransformGroup>
-                            <RotateTransform Angle="320"/>
-                            <TranslateTransform Y="40"/>
+                            <RotateTransform Angle="45"/>
+                            <TranslateTransform X="40" Y="5"/>
                         </TransformGroup>
                     </h:XAxis.LabelTransform>
                 </h:XAxis>
@@ -59,13 +59,14 @@
             FontSize="15"
             DataContext="{x:Bind ViewModel}"
             PaddingFactor="1.2"
-            Padding="10">
+            Padding="10"
+            PlotColors="{ThemeResource PlotColors}">
             <h:BarPlot.XAxis>
                 <h:XAxis Description="X Axis Description">
                     <h:XAxis.LabelTransform>
                         <TransformGroup>
-                            <RotateTransform Angle="320"/>
-                            <TranslateTransform Y="40"/>
+                            <RotateTransform Angle="45"/>
+                            <TranslateTransform X="40" Y="5"/>
                         </TransformGroup>
                     </h:XAxis.LabelTransform>
                 </h:XAxis>
@@ -87,6 +88,33 @@
                     <Setter Property="BorderThickness" Value="2"/>
                 </Style>
             </h:BarPlot.ToolTipStyle>
-        </h:BarPlot>
+        </h:BarPlot>-->
+        <h:BarPlot
+            Grid.Column="0"
+            Grid.Row="1"
+            FontSize="15"
+            DataContext="{x:Bind ViewModel}"
+            PaddingFactor="1.2"
+            Padding="20"
+            PlotColors="{ThemeResource PlotColors}">
+            <h:BarPlot.XAxis>
+                <h:XAxis Description="Ledgers">
+                </h:XAxis>
+            </h:BarPlot.XAxis>
+            <h:BarPlot.YAxis>
+                <h:YAxis Name="Category1" Description="Amount"/>
+            </h:BarPlot.YAxis>
+            <h:BarPlot.Series>
+                <h:Series ItemsSource="{Binding Data4}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Ledgers"/>
+            </h:BarPlot.Series>
+            <h:BarPlot.ToolTipStyle>
+                <Style TargetType="h:SeriesPointToolTip">
+                    <Setter Property="Background" Value="Black"/>
+                    <Setter Property="Foreground" Value="Gray"/>
+                    <Setter Property="BorderBrush" Value="Gray"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Style>
+            </h:BarPlot.ToolTipStyle>
+        </h:BarPlot>        
     </Grid>
 </Page>
