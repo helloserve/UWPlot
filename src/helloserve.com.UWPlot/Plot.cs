@@ -175,7 +175,7 @@ namespace helloserve.com.UWPlot
                 Debug.WriteLine("Arrange Override");
 #endif
 
-                if (!hasDrawn)
+                if (!hasDrawn || LayoutRoot.Children.Count == 0)
                 {
                     Draw();
                 }
