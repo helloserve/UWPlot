@@ -127,11 +127,13 @@ namespace helloserve.com.UWPlot
                 if (!meta.ValueMax.HasValue || value > meta.ValueMax.Value)
                 {
                     meta.ValueMax = value;
+                    meta.ValueMaxLength = dataPoint.ValueText.Length;
                 }
 
                 if (!meta.ValueMin.HasValue || value < meta.ValueMin.Value)
                 {
                     meta.ValueMin = value;
+                    meta.ValueMinLength = dataPoint.ValueText.Length;
                 }
 
                 if (string.IsNullOrEmpty(meta.LongestCategory) || dataPoint.Category.Length > meta.LongestCategory.Length)
@@ -158,7 +160,9 @@ namespace helloserve.com.UWPlot
     internal class SeriesMetaData
     {
         public double? ValueMin { get; set; }
+        public int ValueMinLength { get; set; }
         public double? ValueMax { get; set; }
+        public int ValueMaxLength { get; set; }
         public string LongestCategory { get; set; }
 
         public static SeriesMetaData Empty => new SeriesMetaData();

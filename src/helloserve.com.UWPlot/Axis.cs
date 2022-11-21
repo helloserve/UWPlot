@@ -61,7 +61,10 @@ namespace helloserve.com.UWPlot
         public int? NearestRoundingMagnitude { get; set; }
 
         internal double CalculatedMin { get; set; }
+        internal double MagnitudeMin { get; set; }
         internal double CalculatedMax { get; set; }
+        internal double MagnitudeMax { get; set; }
+        internal double BaseMagnitude { get; set; }
         internal double CalculatedIncrement { get; set; }
         internal List<double> ScaleValues { get; set; }
 
@@ -118,15 +121,7 @@ namespace helloserve.com.UWPlot
             }
         }
 
-        /// <summary>
-        /// Calculate the optimal amount and increment for grid lines and measures the axis accordingly. Returns the grid lines result as a partial extents object.
-        /// </summary>
-        /// <param name="seriesMaxValue"></param>
-        /// <param name="seriesMinValue"></param>
-        /// <param name="height"></param>
-        /// <param name="minHeight"></param>
-        /// <returns></returns>
-        internal PlotExtents Measure(List<List<SeriesDataPoint>> series, double height, double minHeight)
+        internal void CalculateSeriesBounds(List<List<SeriesDataPoint>> series)
         {
             int mostDifferenceOccurance = 0;
             double mostDifference = 0;
@@ -175,8 +170,8 @@ namespace helloserve.com.UWPlot
             double seriesMinValue = allValues.Min();
             double seriesMaxValue = allValues.Max();
 
-            double minMagnitude = 0;
-            double maxMagnitude = 0;
+            double magnitudeMin = 0;
+            double magnitudeMax = 0;
             if (Min.HasValue)
             {
                 CalculatedMin = Min.Value;
@@ -184,9 +179,9 @@ namespace helloserve.com.UWPlot
             else
             {
                 if (seriesMinValue < 0)
-                    CalculatedMin = seriesMinValue.CalculateUpperBound(out minMagnitude);
+                    CalculatedMin = seriesMinValue.CalculateUpperBound(out magnitudeMin);
                 else
-                    CalculatedMin = seriesMinValue.CalculateLowerBound(out minMagnitude);
+                    CalculatedMin = seriesMinValue.CalculateLowerBound(out magnitudeMin);
             }
 
             if (Max.HasValue)
@@ -196,43 +191,50 @@ namespace helloserve.com.UWPlot
             else
             {
                 if (seriesMaxValue < 0)
-                    CalculatedMax = seriesMaxValue.CalculateLowerBound(out maxMagnitude);
+                    CalculatedMax = seriesMaxValue.CalculateLowerBound(out magnitudeMax);
                 else
-                    CalculatedMax = seriesMaxValue.CalculateUpperBound(out maxMagnitude);
+                    CalculatedMax = seriesMaxValue.CalculateUpperBound(out magnitudeMax);
             }
 
-            if (maxMagnitude > minMagnitude)
+            if (magnitudeMax > magnitudeMin)
             {
                 if (CalculatedMin > 0)
                     CalculatedMin = 0;
                 //we can't really increase the magnitude, since the lower bound can't go higher, so best to just make it zero.
             }
-            else if (minMagnitude > maxMagnitude && CalculatedMax != 0)
+            else if (magnitudeMin > magnitudeMax && CalculatedMax != 0)
             {
-                CalculatedMax = minMagnitude * (CalculatedMax / Math.Abs(CalculatedMax));
-            }
-
-
-            CalculatedIncrement = mostMagnitude;
-            int numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
-
-            int scaleLinesCount = (int)(height / minHeight) / 2;
-
-            while (numberOfLines > scaleLinesCount)
-            {
-                if (numberOfLines / scaleLinesCount / 10 > 0)
-                    CalculatedIncrement *= 10;
+                if (CalculatedMax < 0 && CalculatedMin < 0)
+                    CalculatedMax = 0;
                 else
-                    CalculatedIncrement *= 2;
-
-                numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+                    CalculatedMax = magnitudeMin * (CalculatedMax / Math.Abs(CalculatedMax));
             }
+            MagnitudeMin = magnitudeMin;
+            MagnitudeMax = magnitudeMax;
+            BaseMagnitude = mostMagnitude;
+        }
+
+        /// <summary>
+        /// Calculate the optimal amount and increment for grid lines and measures the axis accordingly. Returns the grid lines result as a partial extents object.
+        /// </summary>
+        /// <param name="seriesMaxValue"></param>
+        /// <param name="seriesMinValue"></param>
+        /// <param name="height"></param>
+        /// <param name="minHeight"></param>
+        /// <returns></returns>
+        internal PlotExtents Measure(double height, double minHeight)
+        {
+            int idealNumberOfLines = (int)(height / minHeight) / 2;
+            while (idealNumberOfLines % 2 != 0)
+                idealNumberOfLines--;
+
+            int numberOfLines = CalculateNumberOfLines(MagnitudeMin, MagnitudeMax, BaseMagnitude, idealNumberOfLines);
 
             double heightIncrements = height / numberOfLines;
 
             ScaleValues = new List<double>();
 
-            for (int i = 0; i < numberOfLines + 1; i++)
+            for (int i = 0; i <= numberOfLines; i++)
             {
                 ScaleValues.Add(CalculatedIncrement * i + CalculatedMin);
             }
@@ -242,6 +244,73 @@ namespace helloserve.com.UWPlot
                 NumberOfScaleLines = numberOfLines,
                 ScaleLineIncrements = heightIncrements
             };
+        }
+
+        private int CalculateNumberOfLines(double minMagnitude, double maxMagnitude, double mostMagnitude, int idealNumberOfLines)
+        {
+            CalculatedIncrement = mostMagnitude;
+            int numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+
+            if (idealNumberOfLines == 0)
+            {
+                numberOfLines = 1;
+                CalculatedIncrement = CalculatedMax - CalculatedMin;
+            }
+            else
+            {
+                while (numberOfLines > (idealNumberOfLines + 1) 
+                    && (CalculatedIncrement * 10 < maxMagnitude && CalculatedMax != 0)
+                    && (CalculatedIncrement * 10 < minMagnitude && CalculatedMin != 0))
+                {
+                    CalculatedIncrement *= 10;
+                    numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+                }
+            }
+
+            if (numberOfLines > idealNumberOfLines + 1)
+            {
+                //now we need to handle cases where it's funny
+                var maxPart = CalculatedMax / maxMagnitude;
+                var minPart = CalculatedMin / minMagnitude;
+                var isMaxEven = maxPart % 2 == 0;
+                var isMinEven = minPart % 2 == 0;
+                var isDifferenceEven = (maxPart - minPart) % 2 == 0;
+
+                while (!isMaxEven || !isMinEven)
+                {
+                    if (!isMaxEven)
+                    {
+                        if (maxPart < 1)
+                            maxPart--;
+                        else
+                            maxPart++;                        
+                    }
+
+                    if (!isMinEven)
+                    {
+                        if (minPart < 0)
+                            minPart--;
+                        else if (minPart - 1 >= 0)
+                            minPart--;
+                    }
+
+                    isMaxEven = maxPart % 2 == 0;
+                    isMinEven = minPart % 2 == 0;
+                    isDifferenceEven = (maxPart - minPart) % 2 == 0;
+                }
+
+                CalculatedMin = minPart * minMagnitude;
+                CalculatedMax = maxPart * maxMagnitude;
+                numberOfLines = idealNumberOfLines;
+                CalculatedIncrement = (CalculatedMax - CalculatedMin) / numberOfLines;
+                while (CalculatedIncrement % 10 != 0 && numberOfLines > 0)
+                {
+                    numberOfLines--;
+                    CalculatedIncrement = (CalculatedMax - CalculatedMin) / numberOfLines;
+                }
+            }
+
+            return numberOfLines;
         }
 
         public enum YAxisType

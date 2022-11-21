@@ -10,7 +10,7 @@ namespace helloserve.com.UWPlot.Tests
         public void ShouldCalculateBoundsForAxis(double seriesMax, double seriesMin, double boundsMax, double boundsMin)
         {
             YAxis axis = new YAxis();
-            var extents = axis.Measure(seriesMax, seriesMin, 100, 100);
+            axis.Measure(seriesMax, seriesMin, 100);
             Assert.AreEqual(boundsMax, axis.CalculatedMax);
             Assert.AreEqual(boundsMin, axis.CalculatedMin);
         }

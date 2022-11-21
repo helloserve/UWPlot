@@ -34,7 +34,7 @@ namespace helloserve.com.UWPlot
         public List<YAxis> YAxis { get; set; } = new List<YAxis>();
         public XAxis XAxis { get; set; } = new XAxis();
         public Style ToolTipStyle { get; set; }
-        public double PaddingFactor { get; set; } = 1;
+        public double PaddingFactor { get; set; } = 1.05;
 
         private PlotColorsCollection plotColors = new PlotColorsCollection()
         {
@@ -354,22 +354,26 @@ namespace helloserve.com.UWPlot
                 {
                     SeriesMetaData meta = series.PrepareData(DataContext);
 
-                    if (!extents.ValueMin.HasValue || meta.ValueMin < extents.ValueMin)
-                    {
-                        extents.ValueMin = meta.ValueMin;
-                    }
-
-                    if (!extents.ValueMax.HasValue || meta.ValueMax > extents.ValueMax)
-                    {
-                        extents.ValueMax = meta.ValueMax;
-                        extents.ValueMaxString = extents.ValueMax.FormatObject(series.ValueFormat);
-                    }
-
                     if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory.Length > extents.LongestCategory.Length)
                     {
                         extents.LongestCategory = meta.LongestCategory;
                     }
                 }
+
+                YAxis primaryAxis = YAxis.First(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
+                List<Series> primarySeries = Series.Where(x => x.AxisName == primaryAxis.Name).ToList();
+                if (!primarySeries.Any())
+                {
+                    primarySeries = Series;
+                }
+
+                primaryAxis.CalculateSeriesBounds(primarySeries.Select(x => x.ItemsDataPoints).ToList());
+                
+                extents.ValueMin = primaryAxis.CalculatedMin;
+                extents.ValueMinString = extents.ValueMin.FormatObject(primarySeries.First().ValueFormat);                
+
+                extents.ValueMax = primaryAxis.CalculatedMax;
+                extents.ValueMaxString = extents.ValueMax.FormatObject(primarySeries.First().ValueFormat);
 
                 extents.IsPrepared = true;
             }
@@ -552,7 +556,7 @@ namespace helloserve.com.UWPlot
             OnMeasureLegend();
 
             //plot area elements
-            Size valueTextMaxSize = DataExtents.ValueMaxString.MeasureTextSize(FontSize).WithFactor(PaddingFactor);
+            Size valueTextMaxSize = DataExtents.LongestValueString.MeasureTextSize(FontSize).WithFactor(PaddingFactor);
             Size categoryTextMaxSize = DataExtents.LongestCategory.MeasureTextSize(FontSize, transform: XAxis.LabelTransform).WithFactor(PaddingFactor);
 
             PlotExtents.PlotFrameTopLeft = new Point(Padding.Left + Math.Max(valueTextMaxSize.Width, categoryTextMaxSize.Width / 2), Padding.Top + legendHeight);
@@ -570,20 +574,12 @@ namespace helloserve.com.UWPlot
 
             OnMeasureVerticalGridLines();
 
-            //from primary YAxis
-
-            YAxis primaryAxis = YAxis.First(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
-
-            List<Series> primarySeries = Series.Where(x => x.AxisName == primaryAxis.Name).ToList();
-            if (!primarySeries.Any())
-            {
-                primarySeries = Series;
-            }
-
+            //from primary YAxis            
             double height = PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y;
             double minHeight = valueTextMaxSize.Height * 1.2;  //add 20% buffer area
 
-            var extents = primaryAxis.Measure(primarySeries.Select(x => x.ItemsDataPoints).ToList(), height, minHeight);
+            YAxis primaryAxis = YAxis.First(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
+            var extents = primaryAxis.Measure(height, minHeight);
             PlotExtents.NumberOfScaleLines = extents.NumberOfScaleLines;
             PlotExtents.ScaleLineIncrements = extents.ScaleLineIncrements;
 
@@ -594,12 +590,12 @@ namespace helloserve.com.UWPlot
             foreach (YAxis axis in YAxis.Except(new List<YAxis>() { primaryAxis }))
             {
                 hasSecondaryY = true;
-                primarySeries = Series.Where(x => x.AxisName == axis.Name).ToList();
-                if (!primarySeries.Any())
-                    primarySeries = Series;
+                var secondarySeries = Series.Where(x => x.AxisName == axis.Name).ToList();
+                if (!secondarySeries.Any())
+                    secondarySeries = Series;
 
-                var max = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Max(x => x.Value.Value);
-                var min = primarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Min(x => x.Value.Value);
+                var max = secondarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Max(x => x.Value.Value);
+                var min = secondarySeries.SelectMany(x => x.ItemsDataPoints).Where(x => x.Value.HasValue).Min(x => x.Value.Value);
 
                 axis.Measure(max, min, PlotExtents.NumberOfScaleLines);
             }

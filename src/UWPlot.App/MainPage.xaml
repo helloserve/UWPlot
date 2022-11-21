@@ -89,32 +89,40 @@
                 </Style>
             </h:BarPlot.ToolTipStyle>
         </h:BarPlot>-->
-        <h:BarPlot
+        <h:LinePlot 
             Grid.Column="0"
             Grid.Row="1"
             FontSize="15"
             DataContext="{x:Bind ViewModel}"
-            PaddingFactor="1.2"
-            Padding="20"
+            PaddingFactor="1.05"
+            Padding="10"
             PlotColors="{ThemeResource PlotColors}">
-            <h:BarPlot.XAxis>
-                <h:XAxis Description="Ledgers">
+            <h:LinePlot.XAxis>
+                <h:XAxis Description="X Axis Description">
+                    <h:XAxis.LabelTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="45"/>
+                            <TranslateTransform X="40" Y="5"/>
+                        </TransformGroup>
+                    </h:XAxis.LabelTransform>
                 </h:XAxis>
-            </h:BarPlot.XAxis>
-            <h:BarPlot.YAxis>
-                <h:YAxis Name="Category1" Description="Amount"/>
-            </h:BarPlot.YAxis>
-            <h:BarPlot.Series>
+            </h:LinePlot.XAxis>
+            <h:LinePlot.YAxis>
+                <h:YAxis Name="Category1" Description="Primary Y Axis Description"/>
+            </h:LinePlot.YAxis>
+            <h:LinePlot.Series>
                 <h:Series ItemsSource="{Binding Data4}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Ledgers"/>
-            </h:BarPlot.Series>
-            <h:BarPlot.ToolTipStyle>
+                <h:Series ItemsSource="{Binding Data4_1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Ledgers2"/>
+            </h:LinePlot.Series>
+            <h:LinePlot.ToolTipStyle>
                 <Style TargetType="h:SeriesPointToolTip">
                     <Setter Property="Background" Value="Black"/>
                     <Setter Property="Foreground" Value="Gray"/>
                     <Setter Property="BorderBrush" Value="Gray"/>
                     <Setter Property="BorderThickness" Value="2"/>
                 </Style>
-            </h:BarPlot.ToolTipStyle>
-        </h:BarPlot>        
+            </h:LinePlot.ToolTipStyle>
+        </h:LinePlot>
+
     </Grid>
 </Page>
