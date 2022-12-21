@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
+#if DEBUG
+using System.Diagnostics;    
+#endif
+
 namespace helloserve.com.UWPlot
 {
     public class Series
@@ -70,82 +74,94 @@ namespace helloserve.com.UWPlot
                 return SeriesMetaData.Empty;
             }
 
-            var type = dataContext.GetType();
+            var sw = Stopwatch.StartNew();
 
-            if (contextType is null || type != contextType || sourceProperty is null)
+            try
             {
-                contextType = type;
+                var type = dataContext.GetType();
 
-                var sourceBinding = ItemsSource as Windows.UI.Xaml.Data.Binding;
-                sourceProperty = type.GetProperty(sourceBinding.Path?.Path);
-                if (sourceProperty == null)
+                if (contextType is null || type != contextType || sourceProperty is null)
                 {
-                    throw new ArgumentNullException($"ItemsSource is not a property of {type.Name}.");
+                    contextType = type;
+
+                    var sourceBinding = ItemsSource as Windows.UI.Xaml.Data.Binding;
+                    sourceProperty = type.GetProperty(sourceBinding.Path?.Path);
+                    if (sourceProperty == null)
+                    {
+                        throw new ArgumentNullException($"ItemsSource is not a property of {type.Name}.");
+                    }
+
+                    var sourceType = sourceProperty.PropertyType;
+
+                    if (sourceType.GetInterface(nameof(IEnumerable)) is null)
+                    {
+                        throw new ArgumentException($"ItemsSource is configured with {sourceBinding.Path.Path}, but it doesn't implement IEnumerable.");
+                    }
+
+                    if (sourceType.GenericTypeArguments is null || sourceType.GenericTypeArguments.Length == 0)
+                    {
+                        throw new ArgumentException($"Unable to determine generic type argument of collection at {sourceBinding.Path.Path}");
+                    }
+
+                    var sourceGenericType = sourceType.GenericTypeArguments[0];
+
+                    valuePropertyInfo = sourceGenericType.GetProperty(ValueName);
+                    categoryPropertyInfo = sourceGenericType.GetProperty(CategoryName);
+                    if (!string.IsNullOrEmpty(DisplayName))
+                    {
+                        displayPropertyInfo = sourceGenericType.GetProperty(DisplayName);
+                    }
                 }
 
-                var sourceType = sourceProperty.PropertyType;
+                ItemsCollection = sourceProperty.GetValue(dataContext) as IEnumerable;
 
-                if (sourceType.GetInterface(nameof(IEnumerable)) is null)
+                ItemsDataPoints = new List<SeriesDataPoint>();
+                var meta = new SeriesMetaData();
+
+                foreach (var item in ItemsCollection)
                 {
-                    throw new ArgumentException($"ItemsSource is configured with {sourceBinding.Path.Path}, but it doesn't implement IEnumerable.");
+                    var categoryValue = categoryPropertyInfo.GetValue(item);
+                    var displayValue = string.IsNullOrEmpty(DisplayName) ? string.Empty : displayPropertyInfo.GetValue(item);
+                    var value = (double?)valuePropertyInfo.GetValue(item);
+
+                    var dataPoint = new SeriesDataPoint()
+                    {
+                        Value = value,
+                        ValueText = value.FormatObject(ValueFormat),
+                        Category = categoryValue.FormatObject(CategoryFormat),
+                        Display = displayValue.FormatObject(DisplayFormat)
+                    };
+
+                    if (!meta.ValueMax.HasValue || value > meta.ValueMax.Value)
+                    {
+                        meta.ValueMax = value;
+                        meta.ValueMaxLength = dataPoint.ValueText.Length;
+                    }
+
+                    if (!meta.ValueMin.HasValue || value < meta.ValueMin.Value)
+                    {
+                        meta.ValueMin = value;
+                        meta.ValueMinLength = dataPoint.ValueText.Length;
+                    }
+
+                    if (string.IsNullOrEmpty(meta.LongestCategory) || dataPoint.Category.Length > meta.LongestCategory.Length)
+                    {
+                        meta.LongestCategory = dataPoint.Category;
+                    }
+
+                    ItemsDataPoints.Add(dataPoint);
                 }
 
-                if (sourceType.GenericTypeArguments is null || sourceType.GenericTypeArguments.Length == 0)
-                {
-                    throw new ArgumentException($"Unable to determine generic type argument of collection at {sourceBinding.Path.Path}");
-                }
-
-                var sourceGenericType = sourceType.GenericTypeArguments[0];
-
-                valuePropertyInfo = sourceGenericType.GetProperty(ValueName);
-                categoryPropertyInfo = sourceGenericType.GetProperty(CategoryName);
-                if (!string.IsNullOrEmpty(DisplayName))
-                {
-                    displayPropertyInfo = sourceGenericType.GetProperty(DisplayName);
-                }
+                meta.Count = ItemsDataPoints.Count;
+                MetaData = meta;
+                return meta;
             }
-
-            ItemsCollection = sourceProperty.GetValue(dataContext) as IEnumerable;
-
-            ItemsDataPoints = new List<SeriesDataPoint>();
-            var meta = new SeriesMetaData();
-
-            foreach (var item in ItemsCollection)
+            finally
             {
-                var categoryValue = categoryPropertyInfo.GetValue(item);
-                var displayValue = string.IsNullOrEmpty(DisplayName) ? string.Empty : displayPropertyInfo.GetValue(item);
-                var value = (double?)valuePropertyInfo.GetValue(item);
-
-                var dataPoint = new SeriesDataPoint()
-                {
-                    Value = value,
-                    ValueText = value.FormatObject(ValueFormat),
-                    Category = categoryValue.FormatObject(CategoryFormat),
-                    Display = displayValue.FormatObject(DisplayFormat)
-                };
-
-                if (!meta.ValueMax.HasValue || value > meta.ValueMax.Value)
-                {
-                    meta.ValueMax = value;
-                    meta.ValueMaxLength = dataPoint.ValueText.Length;
-                }
-
-                if (!meta.ValueMin.HasValue || value < meta.ValueMin.Value)
-                {
-                    meta.ValueMin = value;
-                    meta.ValueMinLength = dataPoint.ValueText.Length;
-                }
-
-                if (string.IsNullOrEmpty(meta.LongestCategory) || dataPoint.Category.Length > meta.LongestCategory.Length)
-                {
-                    meta.LongestCategory = dataPoint.Category;
-                }
-
-                ItemsDataPoints.Add(dataPoint);
+#if DEBUG
+                Debug.WriteLine($"Series PrepareData took {sw.ElapsedMilliseconds}ms");
+#endif
             }
-
-            MetaData = meta;
-            return meta;
         }
     }
 
@@ -159,6 +175,7 @@ namespace helloserve.com.UWPlot
 
     internal class SeriesMetaData
     {
+        public int Count { get; set; }
         public double? ValueMin { get; set; }
         public int ValueMinLength { get; set; }
         public double? ValueMax { get; set; }
