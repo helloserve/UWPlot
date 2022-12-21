@@ -350,17 +350,12 @@ namespace helloserve.com.UWPlot
 
             try
             {
-                bool hasData = true;
+                bool hasData = false;
 
                 foreach (Series series in Series)
                 {
                     SeriesMetaData meta = series.PrepareData(DataContext);
-
-                    if (meta.Count == 0)
-                    {
-                        hasData &= false;
-                        break;
-                    }
+                    hasData |= meta.Count > 0;
 
                     if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory.Length > extents.LongestCategory.Length)
                     {
