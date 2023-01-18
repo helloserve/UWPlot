@@ -125,11 +125,12 @@
     <Compile Include="BoundsExtentions.cs" />
     <Compile Include="DataExtents.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Plot.cs" />
     <Compile Include="PlotExtensions.cs" />
     <Compile Include="LinePlot.cs" />
-    <Compile Include="Plot.cs" />
+    <Compile Include="CartesianPlot.cs" />
     <Compile Include="PlotColorsCollection.cs" />
-    <Compile Include="PlotExtents.cs" />
+    <Compile Include="CartesianPlotExtents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Series.cs" />
     <Compile Include="SeriesPointToolTip.cs" />

@@ -3,7 +3,7 @@ using Windows.UI.Xaml;
 
 namespace helloserve.com.UWPlot
 {
-    public class PlotExtents
+    public class CartesianPlotExtents
     {
         public int NumberOfScaleLines { get; set; }
         public double ScaleLineIncrements { get; set; }

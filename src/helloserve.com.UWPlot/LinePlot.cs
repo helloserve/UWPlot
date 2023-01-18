@@ -7,7 +7,7 @@ using Windows.UI.Xaml.Shapes;
 
 namespace helloserve.com.UWPlot
 {
-    public sealed class LinePlot : Plot
+    public sealed class LinePlot : CartesianPlot
     {
         private double lineThickness = 4D;
         public double LineThickness

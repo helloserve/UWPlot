@@ -222,7 +222,7 @@ namespace helloserve.com.UWPlot
         /// <param name="height"></param>
         /// <param name="minHeight"></param>
         /// <returns></returns>
-        internal PlotExtents Measure(double height, double minHeight)
+        internal CartesianPlotExtents Measure(double height, double minHeight)
         {
             int idealNumberOfLines = (int)(height / minHeight) / 2;
             while (idealNumberOfLines % 2 != 0)
@@ -239,7 +239,7 @@ namespace helloserve.com.UWPlot
                 ScaleValues.Add(CalculatedIncrement * i + CalculatedMin);
             }
 
-            return new PlotExtents()
+            return new CartesianPlotExtents()
             {
                 NumberOfScaleLines = numberOfLines,
                 ScaleLineIncrements = heightIncrements

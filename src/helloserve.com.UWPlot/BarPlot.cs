@@ -5,7 +5,7 @@ using Windows.UI.Xaml.Shapes;
 
 namespace helloserve.com.UWPlot
 {
-    public sealed class BarPlot : Plot
+    public sealed class BarPlot : CartesianPlot
     {
         private double barThickness;
         public double BarThickness
