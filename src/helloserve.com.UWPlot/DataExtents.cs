@@ -16,5 +16,6 @@
 
         public string LongestValueString => ValueMaxLength > ValueMinLength ? ValueMaxString : ValueMinString;
 
+        public double TotalCategoryWidth { get; set; }
     }
 }

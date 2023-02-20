@@ -3,4 +3,832 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:me="using:Windows.UI.Xaml.Media"
     xmlns:h="using:helloserve.com.UWPlot">
+    <h:PlotColorsCollection x:Key="PiePlotColors30">
+        <h:PlotColorsCollection.Items>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8ecfb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8ecfb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#d1bbd7"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#d1bbd7"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ba8db4"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ba8db4"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ae76a3"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ae76a3"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#994f88"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#994f88"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#437dbf"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#437dbf"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#5289c7"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#5289c7"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#6195cf"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#6195cf"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#4eb265"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#4eb265"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7cb45"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7cb45"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f6c141"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f6c141"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f4a736"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f4a736"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f1932d"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f1932d"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ee8026"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ee8026"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e65518"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e65518"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#42150a"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#42150a"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#444444"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#444444"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#777777"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#777777"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+        </h:PlotColorsCollection.Items>
+    </h:PlotColorsCollection>
+    <h:PlotColorsCollection x:Key="PiePlotColors25">
+        <h:PlotColorsCollection.Items>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8ecfb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8ecfb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ba8db4"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ba8db4"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#994f88"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#994f88"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#437dbf"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#437dbf"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#5289c7"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#5289c7"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#6195cf"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#6195cf"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7cb45"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7cb45"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f4a736"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f4a736"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ee8026"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ee8026"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e65518"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e65518"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#42150a"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#42150a"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#444444"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#444444"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#777777"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#777777"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+        </h:PlotColorsCollection.Items>
+    </h:PlotColorsCollection>
+    <h:PlotColorsCollection x:Key="PiePlotColors20">
+        <h:PlotColorsCollection.Items>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ba8db4"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ba8db4"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#994f88"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#994f88"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#437dbf"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#437dbf"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#6195cf"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#6195cf"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f6c141"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f6c141"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f1932d"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f1932d"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#444444"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#444444"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+        </h:PlotColorsCollection.Items>
+    </h:PlotColorsCollection>
+    <h:PlotColorsCollection x:Key="PiePlotColors15">
+        <h:PlotColorsCollection.Items>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#d9cce3"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#ae76a3"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#ae76a3"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#882e72"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#5289c7"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#5289c7"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#cae0ab"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f6c141"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f6c141"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f1932d"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f1932d"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#dc050c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#72190e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+        </h:PlotColorsCollection.Items>
+    </h:PlotColorsCollection>
+    <h:PlotColorsCollection x:Key="PiePlotColors10">
+        <h:PlotColorsCollection.Items>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8ecfb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8ecfb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#caaccb"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#aa6f9e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#1965b0"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#7bafde"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#90c987"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f7f056"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#f4a736"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#f4a736"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#e8601c"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+            <h:PlotColorItem>
+                <h:PlotColorItem.StrokeBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.StrokeBrush>
+                <h:PlotColorItem.FillBrush>
+                    <me:SolidColorBrush Color="#a5170e"/>
+                </h:PlotColorItem.FillBrush>
+            </h:PlotColorItem>
+        </h:PlotColorsCollection.Items>
+    </h:PlotColorsCollection>
 </ResourceDictionary>

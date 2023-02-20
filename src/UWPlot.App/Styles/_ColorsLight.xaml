@@ -7,26 +7,26 @@
         <h:PlotColorsCollection.Items>
             <h:PlotColorItem>
                 <h:PlotColorItem.StrokeBrush>
-                    <me:SolidColorBrush Color="DarkSlateGray"/>
+                    <me:SolidColorBrush Color="CornflowerBlue"/>
                 </h:PlotColorItem.StrokeBrush>
                 <h:PlotColorItem.FillBrush>
-                    <me:SolidColorBrush Color="DarkSlateGray"/>
+                    <me:SolidColorBrush Color="CornflowerBlue"/>
                 </h:PlotColorItem.FillBrush>
             </h:PlotColorItem>
             <h:PlotColorItem>
                 <h:PlotColorItem.StrokeBrush>
-                    <me:SolidColorBrush Color="DarkSlateBlue"/>
+                    <me:SolidColorBrush Color="Firebrick"/>
                 </h:PlotColorItem.StrokeBrush>
                 <h:PlotColorItem.FillBrush>
-                    <me:SolidColorBrush Color="DarkSlateBlue"/>
+                    <me:SolidColorBrush Color="Firebrick"/>
                 </h:PlotColorItem.FillBrush>
             </h:PlotColorItem>
             <h:PlotColorItem>
                 <h:PlotColorItem.StrokeBrush>
-                    <me:SolidColorBrush Color="DarkOliveGreen"/>
+                    <me:SolidColorBrush Color="ForestGreen"/>
                 </h:PlotColorItem.StrokeBrush>
                 <h:PlotColorItem.FillBrush>
-                    <me:SolidColorBrush Color="DarkOliveGreen"/>
+                    <me:SolidColorBrush Color="ForestGreen"/>
                 </h:PlotColorItem.FillBrush>
             </h:PlotColorItem>
         </h:PlotColorsCollection.Items>

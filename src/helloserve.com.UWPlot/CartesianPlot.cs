@@ -11,6 +11,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml.Markup;
+using System.ServiceModel.Channels;
 
 #if DEBUG
 using System.Diagnostics;
@@ -21,31 +22,11 @@ namespace helloserve.com.UWPlot
     [ContentProperty(Name = "Series")]
     public abstract class CartesianPlot : Plot
     {
-        public List<Series> Series { get; set; } = new List<Series>();
+        public List<CartesianSeries> Series { get; set; } = new List<CartesianSeries>();
         public List<YAxis> YAxis { get; set; } = new List<YAxis>();
         public XAxis XAxis { get; set; } = new XAxis();
         public Style ToolTipStyle { get; set; }
         public double PaddingFactor { get; set; } = 1.05;
-
-        private Brush plotAreaStrokeBrush = new SolidColorBrush(Colors.Gray);
-        public Brush PlotAreaStrokeBrush
-        {
-            get { return plotAreaStrokeBrush; }
-            set
-            {
-                plotAreaStrokeBrush = value;
-            }
-        }
-
-        private double plotAreaStrokeThickness = 2;
-        public double PlotAreaStrokeThickness
-        {
-            get { return plotAreaStrokeThickness; }
-            set 
-            { 
-                plotAreaStrokeThickness = value;
-            }
-        }
 
         private double gridLineStrokeThickness = 0.5;
         public double GridLineStrokeThickness
@@ -62,8 +43,6 @@ namespace helloserve.com.UWPlot
         internal CartesianPlotExtents PlotExtents = new CartesianPlotExtents();
 
         private SeriesDrawDataPoints[] SeriesDataPoints = null;
-
-        private Exception dataPrepException;
 
         protected override void ClearLayout()
         {
@@ -136,7 +115,7 @@ namespace helloserve.com.UWPlot
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < SeriesDataPoints.Length; i++)
             {
-                Series series = Series[i];
+                CartesianSeries series = Series[i];
                 SeriesDrawDataPoints points = SeriesDataPoints[i];
                 _ = stringBuilder
                     .Append(series.LegendDescription)
@@ -173,21 +152,23 @@ namespace helloserve.com.UWPlot
             {
                 bool hasData = false;
 
-                foreach (Series series in Series)
+                foreach (CartesianSeries series in Series)
                 {
-                    SeriesMetaData meta = series.PrepareData(DataContext);
+                    SeriesMetaData meta = series.PrepareData(DataContext, FontSize, YAxis[0].LabelTransform);
                     hasData |= meta.Count > 0;
 
                     if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory.Length > extents.LongestCategory.Length)
                     {
                         extents.LongestCategory = meta.LongestCategory;
                     }
+
+                    extents.TotalCategoryWidth = meta.TotalCategoryWidth;
                 }
 
                 if (hasData)
                 {
                     YAxis primaryAxis = YAxis.First(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);
-                    List<Series> primarySeries = Series.Where(x => x.AxisName == primaryAxis.Name).ToList();
+                    List<CartesianSeries> primarySeries = Series.Where(x => x.AxisName == primaryAxis.Name).ToList();
                     if (!primarySeries.Any())
                     {
                         primarySeries = Series;
@@ -213,11 +194,9 @@ namespace helloserve.com.UWPlot
         protected override bool ValidateSeries()
         {
             var sw = Stopwatch.StartNew();
-
+            string message = null;
             try
-            {
-                string message = null;
-
+            {               
                 if (dataPrepException != null)
                 {
                     message = dataPrepException.Message;
@@ -289,33 +268,6 @@ namespace helloserve.com.UWPlot
                     }
                 }
 
-                LayoutRoot.Children.Add(new Line()
-                {
-                    X1 = 0,
-                    Y1 = 0,
-                    X2 = LayoutRoot.ActualWidth,
-                    Y2 = LayoutRoot.ActualHeight,
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 10
-                });
-
-                LayoutRoot.Children.Add(new Line()
-                {
-                    X1 = LayoutRoot.ActualWidth,
-                    Y1 = 0,
-                    X2 = 0,
-                    Y2 = LayoutRoot.ActualHeight,
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 10
-                });
-
-                LayoutRoot.Children.Add(new TextBlock()
-                {
-                    Text = message,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                });
-
                 return false;
             }
             finally
@@ -323,6 +275,7 @@ namespace helloserve.com.UWPlot
 #if DEBUG
                 Debug.WriteLine($"{Name} ValidateSeries took {sw.ElapsedMilliseconds}ms");
 #endif
+                dataValidationErrorMessage = message;
             }
         }
 
@@ -356,7 +309,6 @@ namespace helloserve.com.UWPlot
 #if DEBUG
                 Debug.WriteLine($"{Name} ToolTip Added");
 #endif
-                base.Draw();            
             }
             finally
             {
@@ -378,7 +330,7 @@ namespace helloserve.com.UWPlot
             double maxLegendWidth = 0;
             double legendHeight = 0;
             double legendWidth = 0;
-            foreach (Series legendSeries in Series)
+            foreach (CartesianSeries legendSeries in Series)
             {
                 if (!string.IsNullOrEmpty(legendSeries.LegendDescription))
                 {
@@ -507,7 +459,7 @@ namespace helloserve.com.UWPlot
 
             foreach (YAxis axis in YAxis)
             {
-                Series series = Series.FirstOrDefault(s => s.AxisName == axis.Name);
+                CartesianSeries series = Series.FirstOrDefault(s => s.AxisName == axis.Name);
                 for (int i = 0; i < axis.ScaleValues.Count; i++)
                 {
                     double value = axis.ScaleValues[i];
@@ -523,10 +475,17 @@ namespace helloserve.com.UWPlot
             }
 
             double lineStepX = PlotExtents.VerticalGridLineSpace + PlotExtents.PlotAreaTopLeft.X;
+            double categoryStep = Math.Ceiling(Math.Max(1D, DataExtents.TotalCategoryWidth / PlotExtents.AreaWidth));
             for (int i = 0; i < PlotExtents.VerticalGridLineCount; i++)
             {
                 LayoutRoot.DrawLine(lineStepX, PlotExtents.PlotFrameTopLeft.Y, lineStepX, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, GridLineStrokeThickness);
-                LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
+                if ((i + 1) % categoryStep == 0)
+                {
+                    if (i == PlotExtents.VerticalGridLineCount - 1 && categoryStep > 1)
+                        continue;
+
+                    LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
+                }
 
                 lineStepX += PlotExtents.VerticalGridLineSpace;
             }
@@ -534,7 +493,7 @@ namespace helloserve.com.UWPlot
             LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[Series[0].ItemsDataPoints.Count - 1].Category, PlotExtents.PlotAreaBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
 
             double legendX = (PlotExtents.LegendAreaBottomRight.X - PlotExtents.LegendAreaTopLeft.X) * 0.08D;
-            foreach (Series series in Series)
+            foreach (CartesianSeries series in Series)
             {
                 var drawSize = LayoutRoot.DrawLegendItem(series.LegendDescription, legendX + PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, FontSize, PlotExtents.LegendItemIndicatorWidth, PlotColors[Series.IndexOf(series)].StrokeBrush);
                 legendX += drawSize.Width;
@@ -561,7 +520,7 @@ namespace helloserve.com.UWPlot
 
             double plotHeight = PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y;
 
-            foreach (Series series in Series)
+            foreach (CartesianSeries series in Series)
             {
                 YAxis axis = YAxis.SingleOrDefault(a => a.Name == series.AxisName);
                 axis = axis ?? YAxis.SingleOrDefault(a => a.AxisType == UWPlot.YAxis.YAxisType.Primary);

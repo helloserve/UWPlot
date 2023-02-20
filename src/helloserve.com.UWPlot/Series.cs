@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-
-#if DEBUG
-using System.Diagnostics;    
-#endif
+﻿using Windows.UI.Xaml.Media;
 
 namespace helloserve.com.UWPlot
 {
-    public class Series
+    public abstract class Series
     {
         public object ItemsSource { get; set; }
         public string ValueName { get; set; }
         public string DisplayName { get; set; }
         public string CategoryName { get; set; }
+
 
         /// <summary>
         /// A format string for the value.
@@ -32,137 +26,16 @@ namespace helloserve.com.UWPlot
         public string CategoryFormat { get; set; }
 
         /// <summary>
-        /// The name of the Y axis that this series is bound to.
-        /// </summary>
-        public string AxisName { get; set; }
-
-        /// <summary>
         /// The description in the legend box of this series.
         /// </summary>
         public string LegendDescription { get; set; }
-
-        /// <summary>
-        /// The size of the bullet drawn at each data point. Default is 1% of the maximum extent. Make 0 to remove.
-        /// </summary>
-        public double? PointBulletSize { get; set; }
 
         /// <summary>
         /// Controls whether the specific values are shown at the data points in the graph.
         /// </summary>
         public bool ShowDataPointValues { get; set; }
 
-        private Type contextType;
-        private PropertyInfo sourceProperty;
-        private PropertyInfo valuePropertyInfo;
-        private PropertyInfo displayPropertyInfo;
-        private PropertyInfo categoryPropertyInfo;
-
-        internal IEnumerable ItemsCollection { get; set; }
-        internal List<SeriesDataPoint> ItemsDataPoints { get; set; }
-        internal SeriesMetaData MetaData { get; set; }
-
-        internal SeriesMetaData PrepareData(object dataContext)
-        {
-            if (dataContext is null)
-            {
-                throw new ArgumentNullException(nameof(dataContext));
-            }
-
-            if (string.IsNullOrEmpty(ValueName) || string.IsNullOrEmpty(CategoryName))
-            {
-                ItemsCollection = null;
-                return SeriesMetaData.Empty;
-            }
-
-            var sw = Stopwatch.StartNew();
-
-            try
-            {
-                var type = dataContext.GetType();
-
-                if (contextType is null || type != contextType || sourceProperty is null)
-                {
-                    contextType = type;
-
-                    var sourceBinding = ItemsSource as Windows.UI.Xaml.Data.Binding;
-                    sourceProperty = type.GetProperty(sourceBinding.Path?.Path);
-                    if (sourceProperty == null)
-                    {
-                        throw new ArgumentNullException($"ItemsSource is not a property of {type.Name}.");
-                    }
-
-                    var sourceType = sourceProperty.PropertyType;
-
-                    if (sourceType.GetInterface(nameof(IEnumerable)) is null)
-                    {
-                        throw new ArgumentException($"ItemsSource is configured with {sourceBinding.Path.Path}, but it doesn't implement IEnumerable.");
-                    }
-
-                    if (sourceType.GenericTypeArguments is null || sourceType.GenericTypeArguments.Length == 0)
-                    {
-                        throw new ArgumentException($"Unable to determine generic type argument of collection at {sourceBinding.Path.Path}");
-                    }
-
-                    var sourceGenericType = sourceType.GenericTypeArguments[0];
-
-                    valuePropertyInfo = sourceGenericType.GetProperty(ValueName);
-                    categoryPropertyInfo = sourceGenericType.GetProperty(CategoryName);
-                    if (!string.IsNullOrEmpty(DisplayName))
-                    {
-                        displayPropertyInfo = sourceGenericType.GetProperty(DisplayName);
-                    }
-                }
-
-                ItemsCollection = sourceProperty.GetValue(dataContext) as IEnumerable;
-
-                ItemsDataPoints = new List<SeriesDataPoint>();
-                var meta = new SeriesMetaData();
-
-                foreach (var item in ItemsCollection)
-                {
-                    var categoryValue = categoryPropertyInfo.GetValue(item);
-                    var displayValue = string.IsNullOrEmpty(DisplayName) ? string.Empty : displayPropertyInfo.GetValue(item);
-                    var value = (double?)valuePropertyInfo.GetValue(item);
-
-                    var dataPoint = new SeriesDataPoint()
-                    {
-                        Value = value,
-                        ValueText = value.FormatObject(ValueFormat),
-                        Category = categoryValue.FormatObject(CategoryFormat),
-                        Display = displayValue.FormatObject(DisplayFormat)
-                    };
-
-                    if (!meta.ValueMax.HasValue || value > meta.ValueMax.Value)
-                    {
-                        meta.ValueMax = value;
-                        meta.ValueMaxLength = dataPoint.ValueText.Length;
-                    }
-
-                    if (!meta.ValueMin.HasValue || value < meta.ValueMin.Value)
-                    {
-                        meta.ValueMin = value;
-                        meta.ValueMinLength = dataPoint.ValueText.Length;
-                    }
-
-                    if (string.IsNullOrEmpty(meta.LongestCategory) || dataPoint.Category.Length > meta.LongestCategory.Length)
-                    {
-                        meta.LongestCategory = dataPoint.Category;
-                    }
-
-                    ItemsDataPoints.Add(dataPoint);
-                }
-
-                meta.Count = ItemsDataPoints.Count;
-                MetaData = meta;
-                return meta;
-            }
-            finally
-            {
-#if DEBUG
-                Debug.WriteLine($"Series PrepareData took {sw.ElapsedMilliseconds}ms");
-#endif
-            }
-        }
+        internal abstract SeriesMetaData PrepareData(object dataContext, double fontSize = 12, Transform categoryTransform = null);
     }
 
     internal class SeriesDataPoint
@@ -181,6 +54,7 @@ namespace helloserve.com.UWPlot
         public double? ValueMax { get; set; }
         public int ValueMaxLength { get; set; }
         public string LongestCategory { get; set; }
+        public double TotalCategoryWidth { get; set; }
 
         public static SeriesMetaData Empty => new SeriesMetaData();
     }

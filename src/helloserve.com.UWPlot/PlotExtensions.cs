@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -68,6 +69,71 @@ namespace helloserve.com.UWPlot
             layoutRoot.Children.Add(line);
         }
 
+        const double radianSegmentStep = (Math.PI * 2) / 128;
+        public static Point DrawSlice(this Canvas layoutRoot, double ox, double oy, double radius, double startAngle, double sweepAngle, Brush strokeColor, double strokeTickness, Brush fillColor)
+        {
+            var points = new PointCollection();
+
+            double avgX = 0;
+            double avgY = 0;
+            int avgCount = 2;
+
+            var startX = radius * Math.Cos(startAngle);
+            var startY = radius * Math.Sin(startAngle);
+            avgX += startX;
+            avgY += startY;
+
+            points.Add(new Point(ox, oy));
+            points.Add(new Point(startX + ox, startY + oy));
+            
+            double angle = radianSegmentStep;
+
+            while (angle < sweepAngle) 
+            {            
+                var x = startX * Math.Cos(angle) - startY * Math.Sin(angle);
+                var y = startX * Math.Sin(angle) + startY * Math.Cos(angle);
+
+                points.Add(new Point(x + ox, y + oy));
+
+                avgX += x;
+                avgY += y;
+                avgCount++;
+
+                angle += radianSegmentStep;
+            }
+
+            var endX = startX * Math.Cos(sweepAngle) - startY * Math.Sin(sweepAngle);
+            var endY = startX * Math.Sin(sweepAngle) + startY * Math.Cos(sweepAngle);
+            avgX += endX;
+            avgY += endY;
+
+            points.Add(new Point(endX + ox, endY + oy));
+            points.Add(new Point(ox, oy));
+
+            Polygon slice = new Polygon();
+            slice.Fill = fillColor;
+            slice.Stroke = strokeColor;
+            slice.StrokeThickness = strokeTickness;
+            slice.Points = points;
+
+            layoutRoot.Children.Add(slice);
+
+            return new Point(avgX / avgCount, avgY / avgCount);
+        }
+
+        public static Size DrawSliceLabel(this Canvas layoutRoot, string value, double x, double y, double fontSize, Brush backgroundBrush, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        {
+            return layoutRoot.DrawString(value, fontSize, s =>
+            {
+                return new Thickness(x - (s.Width / 2), y - (s.Height / 2), 0, 0);
+            }, backgroundBrush, paddingFactor, transform, limitedToWidth, limitedToHeight);
+        }
+
+        public static double ToRadians(this double angle)
+        {
+            return angle / (180 / Math.PI);
+        }
+
         public static void DrawCategoryItem(this Canvas layoutRoot, string category, double x, double y, double fontSize, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             layoutRoot.DrawString(category, fontSize, size => new Thickness(x - (size.Width / 2), y + size.FactorDifference(paddingFactor).Height, 0, 0), paddingFactor, transform);
@@ -105,10 +171,10 @@ namespace helloserve.com.UWPlot
                 double offsetPadding = 0.2D;
                 var plotX = x - size.Width / 2 * paddingFactor;
                 var plotY = y;
-                switch(offset) 
+                switch (offset)
                 {
-                    case DataPointLocation.Above: plotY -= size.Height;break;
-                    case DataPointLocation.Below: plotY += size.Height * 0.1D;break;
+                    case DataPointLocation.Above: plotY -= size.Height; break;
+                    case DataPointLocation.Below: plotY += size.Height * 0.1D; break;
                     default: break;
                 }
                 if (plotX < plotArea.X)
@@ -145,13 +211,15 @@ namespace helloserve.com.UWPlot
         /// <returns>A <see cref="Windows.Foundation.Size"/> object of the textblock that was created, so that subsequent legend items can be offset correctly.</returns>
         public static Size DrawLegendItem(this Canvas layoutRoot, string value, double x, double y, double fontSize, double indicatorWidth, Brush color, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
-            Size descriptionSize = layoutRoot.DrawString(value, fontSize, size => new Thickness(x, y, 0, 0), paddingFactor, transform);
+            Size descriptionSize = layoutRoot.DrawString(value, fontSize, size => new Thickness(x + 10 + indicatorWidth, y, 0, 0), paddingFactor, transform);
 
-            var points = new PointCollection();
-            points.Add(new Point(x + descriptionSize.Width + 10, y));
-            points.Add(new Point(x + descriptionSize.Width + 10, y + descriptionSize.Height));
-            points.Add(new Point(x + descriptionSize.Width + 10 + indicatorWidth, y + descriptionSize.Height));
-            points.Add(new Point(x + descriptionSize.Width + 10 + indicatorWidth, y));
+            var points = new PointCollection
+            {
+                new Point(x, y),
+                new Point(x, y + descriptionSize.Height),
+                new Point(x + indicatorWidth, y + descriptionSize.Height),
+                new Point(x + indicatorWidth, y)
+            };
 
             Polygon indicator = new Polygon();
             indicator.Fill = color;
@@ -160,6 +228,25 @@ namespace helloserve.com.UWPlot
             layoutRoot.Children.Add(indicator);
 
             return new Size(descriptionSize.Width + indicatorWidth + 40, descriptionSize.Height);
+        }
+
+        public static Size DrawLegendValue(this Canvas layoutRoot, string value, double x, double y, double fontSize, TextAlignment textAlignment, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
+        {
+            return layoutRoot.DrawString(value, fontSize, (s) =>
+            {
+                if (textAlignment == TextAlignment.Center)
+                {
+                    return new Thickness(x - (s.Width / 2), y, 0, 0);
+                }
+                else if (textAlignment == TextAlignment.Right)
+                {
+                    return new Thickness(x - s.Width, y, 0, 0);
+                }
+                else
+                {
+                    return new Thickness(x, y, 0, 0);
+                }
+            }, paddingFactor, transform, limitedToWidth, limitedToHeight);
         }
 
         private static Size DrawString(this Canvas layoutRoot, string value, double fontSize, Func<Size, Thickness> positionFunc, double paddingFactor, Transform transform, double? limitedToWidth = null, double? limitedToHeight = null)
@@ -185,6 +272,44 @@ namespace helloserve.com.UWPlot
             textBlock.Margin = positionFunc(desiredSize);
 
             layoutRoot.Children.Add(textBlock);
+
+            return desiredSize;
+        }
+
+        private static Size DrawString(this Canvas layoutRoot, string value, double fontSize, Func<Size, Thickness> positionFunc, Brush backgroundBrush, double paddingFactor, Transform transform, double? limitedToWidth = null, double? limitedToHeight = null)
+        {
+            var textBlock = new TextBlock();
+            textBlock.Text = value;
+            textBlock.FontSize = fontSize;
+            if (transform != null)
+                textBlock.RenderTransform = transform;
+
+            Size availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
+            if (limitedToWidth.HasValue)
+            {
+                availableSize.Width = limitedToWidth.Value;
+            }
+            if (limitedToHeight.HasValue)
+            {
+                availableSize.Height = limitedToHeight.Value;
+            }
+
+            textBlock.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Size desiredSize = textBlock.DesiredSize.WithFactor(paddingFactor);
+            Thickness margin = positionFunc(desiredSize);
+
+            var canvas = new Grid();
+            canvas.Background = backgroundBrush;
+            canvas.Margin = new Thickness(
+                margin.Left,
+                margin.Top,
+                margin.Right,
+                margin.Bottom);
+            canvas.Padding = new Thickness(2, 2, 2, 2);
+            canvas.Children.Add(textBlock);
+
+            //layoutRoot.Children.Add(textBlock);
+            layoutRoot.Children.Add(canvas);
 
             return desiredSize;
         }

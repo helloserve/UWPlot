@@ -2,11 +2,46 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Windows.UI.Xaml;
 
 namespace UWPlot.App
 {
     public class ChartTester : INotifyPropertyChanged
     {
+        private ElementTheme _elementTheme = ThemeSelectorService.Theme;
+        public ElementTheme ElementTheme
+        {
+            get { return _elementTheme; }
+
+            set 
+            { 
+                _elementTheme = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ElementTheme"));
+            }
+        }
+
+        private ICommand _switchThemeCommand;
+
+        public ICommand SwitchThemeCommand
+        {
+            get
+            {
+                if (_switchThemeCommand == null)
+                {
+                    _switchThemeCommand = new RelayCommand<ElementTheme>(
+                        async (param) =>
+                        {
+                            ElementTheme = param;
+                            await ThemeSelectorService.SetThemeAsync(param);
+                        });
+                }
+
+                return _switchThemeCommand;
+            }
+        }
+
         public ObservableCollection<DataPoint> Data1 { get; } = new ObservableCollection<DataPoint>();
         public ObservableCollection<DataPoint> Data2 { get; } = new ObservableCollection<DataPoint>();
         public ObservableCollection<DataPoint> Data3 { get; } = new ObservableCollection<DataPoint>();
@@ -20,7 +55,7 @@ namespace UWPlot.App
 
         public void Initialize()
         {
-            int count = 10;
+            int count = 18;
 
             var rnd = new Random();
             Enumerable.Range(0, count).Select(x => new DataPoint()
@@ -61,11 +96,6 @@ namespace UWPlot.App
             Data4.Add(new LedgerPoint() { Category = "Ledger 3", Name = "Data4-3", Value = -1000 });
             Data4.Add(new LedgerPoint() { Category = "Ledger 4", Name = "Data4-4", Value = -8000 });
             Data4.Add(new LedgerPoint() { Category = "Ledger 5", Name = "Data4-5", Value = -10000 });
-            Data4.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data4-6", Value = -1000 });
-            Data4.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data4-7", Value = 0 });
-            Data4.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data4-8", Value = -7000 });
-            Data4.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data4-9", Value = -6000 });
-            Data4.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data4-10", Value = -5000 });
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data4)));
 
@@ -92,7 +122,11 @@ namespace UWPlot.App
             Data5.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data5-8", Value = -100 });
             Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data5-9", Value = -1000 });
             Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data5-10", Value = -3400 });
-
+            Data5.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data4-6", Value = -1000 });
+            Data5.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data4-7", Value = 0 });
+            Data5.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data4-8", Value = -7000 });
+            Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data4-9", Value = -6000 });
+            Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data4-10", Value = -5000 });
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data5)));
 
         }
@@ -100,6 +134,27 @@ namespace UWPlot.App
         private static double Evaluate(int x, Func<int, double> multiplier, Func<double, double> equation)
         {
             return equation(multiplier(x));
+        }
+
+        public Task Change()
+        {
+            Data1.Clear();
+
+            int count = 18;
+
+            var rnd = new Random();
+            Enumerable.Range(0, count).Select(x => new DataPoint()
+            {
+                Value = x * rnd.Next(100),
+                Name = $"Data1-{x}",
+                Category = DateTime.Today.AddDays(x)
+            })
+                .ToList()
+                .ForEach(x => Data1.Add(x));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data1)));
+
+            return Task.CompletedTask;
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Windows.Foundation;
@@ -6,6 +7,7 @@ using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Shapes;
 
 namespace helloserve.com.UWPlot
 {
@@ -46,9 +48,32 @@ namespace helloserve.com.UWPlot
             set => SetValue(PlotColorsProperty, value);
         }
 
+        private Brush plotAreaStrokeBrush = new SolidColorBrush(Colors.Gray);
+        public Brush PlotAreaStrokeBrush
+        {
+            get { return plotAreaStrokeBrush; }
+            set
+            {
+                plotAreaStrokeBrush = value;
+            }
+        }
+
+        private double plotAreaStrokeThickness = 2;
+        public double PlotAreaStrokeThickness
+        {
+            get { return plotAreaStrokeThickness; }
+            set
+            {
+                plotAreaStrokeThickness = value;
+            }
+        }
+
         protected Canvas LayoutRoot = null;
 
         internal DataExtents DataExtents = new DataExtents();
+
+        protected Exception dataPrepException;
+        protected string dataValidationErrorMessage;
 
         public Plot()
         {
@@ -81,7 +106,7 @@ namespace helloserve.com.UWPlot
 
             HandlePlotLoaded(sender, e);
 
-            hasDrawn = true;
+            hasDrawn = false;
             InvalidateMeasure();
         }
 
@@ -164,7 +189,7 @@ namespace helloserve.com.UWPlot
                 if (LayoutRoot == null)
                     return finalSize;
 
-                if (!DataExtents.IsPrepared)
+                if (!(DataExtents.IsPrepared || string.IsNullOrEmpty(dataValidationErrorMessage)))
                     return finalSize;
 
 #if DEBUG
@@ -173,7 +198,7 @@ namespace helloserve.com.UWPlot
 
                 if (!hasDrawn || LayoutRoot.Children.Count == 0)
                 {
-                    Draw();
+                    DrawSelf();
                 }
                 else
                 {
@@ -204,12 +229,61 @@ namespace helloserve.com.UWPlot
             LayoutRoot.Children.Clear();
         }
 
-        internal abstract void PrepareData(DataExtents extents);
-        protected abstract bool ValidateSeries();
-        protected abstract Size MeasurePlot(Size size);
-        protected virtual void Draw()
+        private void DrawSelf()
         {
+            if (LayoutRoot == null)
+                return;
+
+            if (hasDrawn)
+                return;
+
+            ClearLayout();
+
+            if (!string.IsNullOrEmpty(dataValidationErrorMessage) || dataPrepException != null)
+            {
+                DrawPlotError();
+            }
+            else
+            {
+                Draw();
+            }
+
             hasDrawn = true;
         }
+
+        protected virtual void DrawPlotError()
+        {
+            LayoutRoot.Children.Add(new Line()
+            {
+                X1 = 0,
+                Y1 = 0,
+                X2 = LayoutRoot.ActualWidth,
+                Y2 = LayoutRoot.ActualHeight,
+                Stroke = new SolidColorBrush(Colors.Maroon),
+                StrokeThickness = 2
+            });
+
+            LayoutRoot.Children.Add(new Line()
+            {
+                X1 = LayoutRoot.ActualWidth,
+                Y1 = 0,
+                X2 = 0,
+                Y2 = LayoutRoot.ActualHeight,
+                Stroke = new SolidColorBrush(Colors.Maroon),
+                StrokeThickness = 2
+            });
+
+            LayoutRoot.Children.Add(new TextBlock()
+            {
+                Text = dataValidationErrorMessage ?? dataPrepException?.Message ?? "Data Error",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            });
+        }
+
+        internal abstract void PrepareData(DataExtents extents);
+        protected abstract bool ValidateSeries();
+        protected abstract Size MeasurePlot(Size availableSize);
+        protected abstract void Draw();
     }
 }
