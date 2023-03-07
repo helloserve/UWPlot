@@ -1,5 +1,4 @@
 ﻿using System;
-using Windows.UI.Xaml.Documents;
 
 namespace helloserve.com.UWPlot
 {
@@ -9,6 +8,9 @@ namespace helloserve.com.UWPlot
         {
             double bound = value.CalculateUpperBoundFromValue(range, out magnitude);
             double actualPercent = (Math.Abs(bound) - Math.Abs(value)) / Math.Abs(value);
+            if (range < 10)
+                return bound;
+
             if (actualPercent > 0.1D)
                 return bound;
 
