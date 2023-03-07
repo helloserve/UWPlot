@@ -137,8 +137,10 @@ namespace helloserve.com.UWPlot
             Debug.WriteLine($"{Name} Data Changed");
 #endif
             DataExtents.IsPrepared = false;
-
             hasDrawn = false;
+            dataPrepException = null;
+            dataValidationErrorMessage = null;
+
             InvalidateMeasure();
         }
 

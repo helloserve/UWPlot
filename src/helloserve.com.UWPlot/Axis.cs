@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 
 namespace helloserve.com.UWPlot
@@ -86,9 +88,9 @@ namespace helloserve.com.UWPlot
             {
                 double magnitude = 0;
                 if (seriesMinValue < 0)
-                    CalculatedMin = seriesMinValue.CalculateUpperBound(out magnitude);
+                    CalculatedMin = seriesMinValue.CalculateUpperBound(null, out magnitude);
                 else
-                    CalculatedMin = seriesMinValue.CalculateLowerBound(out magnitude);
+                    CalculatedMin = seriesMinValue.CalculateLowerBound(null, out magnitude);
             }
 
             if (Max.HasValue)
@@ -99,9 +101,9 @@ namespace helloserve.com.UWPlot
             {
                 double magnitude = 0;
                 if (seriesMaxValue < 0)
-                    CalculatedMax = seriesMaxValue.CalculateLowerBound(out magnitude);
+                    CalculatedMax = seriesMaxValue.CalculateLowerBound(null, out magnitude);
                 else
-                    CalculatedMax = seriesMaxValue.CalculateUpperBound(out magnitude);
+                    CalculatedMax = seriesMaxValue.CalculateUpperBound(null, out magnitude);
             }
 
             if (Increment.HasValue)
@@ -121,22 +123,115 @@ namespace helloserve.com.UWPlot
             }
         }
 
+        internal void CalculateSeriesBoundsV2(List<List<SeriesDataPoint>> series)
+        {
+            double overallMin = series.Min(x => x.Where(p => p.Value.HasValue).Min(p => p.Value.Value));
+            double overallMax = series.Max(x => x.Where(p => p.Value.HasValue).Max(p => p.Value.Value));
+
+            double minSign = overallMin / Math.Abs(overallMin);
+            double maxSign = overallMax / Math.Abs(overallMax);
+
+            double overallDifference = overallMax - overallMin;
+            double marginRatio = overallDifference * 0.1D;
+
+            double lower = overallMin - marginRatio;
+            double upper = overallMax + marginRatio;
+
+            if (overallMin > 0 && lower < 0)
+                lower = 0;
+
+            if (overallMax < 0 && upper > 0)
+                upper = 0;
+
+            lower = NearestRound(lower, minSign);
+            upper = NearestRound(upper, maxSign);
+
+            CalculatedMin = lower;
+            CalculatedMax = upper;
+            if (Min.HasValue)
+            {
+                CalculatedMin = Min.Value;
+            }
+
+            if (Max.HasValue)
+            {
+                CalculatedMax = Max.Value;
+            }
+
+            double NearestRound(double value, double sign)
+            {
+                double abs = Math.Abs(value);
+                if (value < 100)
+                {
+                    if (overallDifference < 10)
+                    {
+                        value = Math.Ceiling(value);
+                    }
+                    else if (overallDifference < 100)
+                    {
+                        value = Math.Truncate(value / 10) * 10;
+                    }
+                }
+                else if (value < 1000)
+                {
+                    value = Math.Truncate(value / 100) * 100;
+                }
+                else if (value < 10000)
+                {
+                    value = Math.Truncate(value / 1000) * 1000;
+                }
+                else if (value < 100000)
+                {
+                    value = Math.Truncate(value / 10000) * 10000;
+                }
+                else if (value < 1000000)
+                {
+                    value = Math.Truncate(value / 100000) * 100000;
+                }
+                else
+                {
+                    value = Math.Truncate(value / 1000000) * 1000000;
+                }
+
+                return value * sign;
+            }
+        }
+
         internal void CalculateSeriesBounds(List<List<SeriesDataPoint>> series)
         {
             int mostDifferenceOccurance = 0;
             double mostDifference = 0;
             int mostMagnitudeOccurance = 0;
             double mostMagnitude = 0;
+            double overallMax = double.MinValue;
+            double overallMin = double.MaxValue;
             List<Dictionary<double, int>> seriesDifferencesRounded = new List<Dictionary<double, int>>();
             List<Dictionary<double, int>> seriesMagnitudes = new List<Dictionary<double, int>>();
             for (int i = 0; i < series.Count; i++)
             {
                 seriesDifferencesRounded.Add(new Dictionary<double, int>());
                 seriesMagnitudes.Add(new Dictionary<double, int>());
-                for (int p = 1; p < series[i].Count - 1; p++)
+
+                if (series[i].Count > 0 && series[i][0].Value.HasValue)
                 {
-                    var difference = Math.Abs(series[i][p].Value.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
-                    var roundedDifference = difference.CalculateUpperBound(out double magnitude);
+                    if (series[i][0].Value > overallMax)
+                        overallMax = series[i][0].Value.Value;
+                    if (series[i][0].Value < overallMin)
+                        overallMin = series[i][0].Value.Value;
+                }
+
+                for (int p = 1; p < series[i].Count; p++)
+                {
+                    var indexValue = series[i][p].Value;
+                    if (indexValue.HasValue)
+                    {
+                        if (indexValue > overallMax)
+                            overallMax = indexValue.Value;
+                        if (indexValue < overallMin)
+                            overallMin = indexValue.Value;
+                    }
+                    var difference = Math.Abs(indexValue.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
+                    var roundedDifference = difference.CalculateUpperBound(difference, out double magnitude);
                     if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
                         seriesDifferencesRounded[i][roundedDifference]++;
                     else
@@ -166,9 +261,7 @@ namespace helloserve.com.UWPlot
                 }
             }
 
-            var allValues = series.SelectMany(x => x.Where(s => s.Value.HasValue).Select(s => s.Value.GetValueOrDefault())).ToList();
-            double seriesMinValue = allValues.Min();
-            double seriesMaxValue = allValues.Max();
+            double overallDifference = overallMax - overallMin;
 
             double magnitudeMin = 0;
             double magnitudeMax = 0;
@@ -178,10 +271,10 @@ namespace helloserve.com.UWPlot
             }
             else
             {
-                if (seriesMinValue < 0)
-                    CalculatedMin = seriesMinValue.CalculateUpperBound(out magnitudeMin);
+                if (overallMin < 0)
+                    CalculatedMin = overallMin.CalculateUpperBound(overallDifference, out magnitudeMin);
                 else
-                    CalculatedMin = seriesMinValue.CalculateLowerBound(out magnitudeMin);
+                    CalculatedMin = overallMin.CalculateLowerBound(overallDifference, out magnitudeMin);
             }
 
             if (Max.HasValue)
@@ -190,10 +283,10 @@ namespace helloserve.com.UWPlot
             }
             else
             {
-                if (seriesMaxValue < 0)
-                    CalculatedMax = seriesMaxValue.CalculateLowerBound(out magnitudeMax);
+                if (overallMax < 0)
+                    CalculatedMax = overallMax.CalculateLowerBound(overallDifference, out magnitudeMax);
                 else
-                    CalculatedMax = seriesMaxValue.CalculateUpperBound(out magnitudeMax);
+                    CalculatedMax = overallMax.CalculateUpperBound(overallDifference, out magnitudeMax);
             }
 
             if (magnitudeMax > magnitudeMin)

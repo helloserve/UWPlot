@@ -121,6 +121,26 @@ namespace helloserve.com.UWPlot
             return new Point(avgX / avgCount, avgY / avgCount);
         }
 
+        public static void DrawArea(this Canvas layoutRoot, PointCollection points, Brush strokeColor, double strokeTickness, Brush fillColor)
+        {
+            Polygon area = new Polygon();
+            area.Fill = fillColor;
+            area.Stroke = null;
+            area.StrokeThickness = 0;
+            area.Points = points;
+
+            layoutRoot.Children.Add(area);
+
+            double pX = points[0].X;
+            double pY = points[0].Y;
+            for (int i = 1; i < points.Count - 3; i++)
+            {
+                layoutRoot.DrawLine(pX, pY, points[i].X, points[i].Y, strokeColor, strokeTickness);
+                pX = points[i].X;
+                pY = points[i].Y;
+            }
+        }
+
         public static Size DrawSliceLabel(this Canvas layoutRoot, string value, double x, double y, double fontSize, Brush backgroundBrush, double paddingFactor = 1, Transform transform = null, double? limitedToWidth = null, double? limitedToHeight = null)
         {
             return layoutRoot.DrawString(value, fontSize, s =>

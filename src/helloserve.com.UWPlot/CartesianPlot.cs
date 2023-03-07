@@ -65,6 +65,9 @@ namespace helloserve.com.UWPlot
 
         private void LayoutRoot_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
+            if (dataPrepException != null || !string.IsNullOrEmpty(dataValidationErrorMessage))
+                return;
+
             Point pointerPosition = Windows.UI.Core.CoreWindow.GetForCurrentThread().PointerPosition;
             double x = Math.Max(0, pointerPosition.X - Window.Current.Bounds.X);
             double y = Math.Max(0, pointerPosition.Y - Window.Current.Bounds.Y);

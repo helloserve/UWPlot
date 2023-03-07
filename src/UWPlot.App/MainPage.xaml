@@ -23,36 +23,6 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
-        <!--<h:PiePlot
-            Grid.Column="0"
-            Grid.Row="0"
-            DataContext="{x:Bind ViewModel}"
-            PaddingFactor="1.2"
-            Padding="10"
-            PlotColors10="{ThemeResource PiePlotColors10}"
-            PlotColors15="{ThemeResource PiePlotColors15}"
-            PlotColors20="{ThemeResource PiePlotColors20}"
-            PlotColors25="{ThemeResource PiePlotColors25}"
-            PlotColors="{ThemeResource PiePlotColors30}">
-            <h:PiePlot.Series>
-                <h:PieSeries ItemsSource="{Binding Data5}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" LegendDescription="Only Series"/>
-            </h:PiePlot.Series>
-        </h:PiePlot>
-        <h:PiePlot
-            Grid.Column="0"
-            Grid.Row="1"
-            DataContext="{x:Bind ViewModel}"
-            PaddingFactor="1.2"
-            Padding="10"
-            PlotColors10="{ThemeResource PiePlotColors10}"
-            PlotColors15="{ThemeResource PiePlotColors15}"
-            PlotColors20="{ThemeResource PiePlotColors20}"
-            PlotColors25="{ThemeResource PiePlotColors25}"
-            PlotColors="{ThemeResource PiePlotColors30}">
-            <h:PiePlot.Series>
-                <h:PieSeries ItemsSource="{Binding Data4}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" LegendDescription="Only Series"/>
-            </h:PiePlot.Series>
-        </h:PiePlot>-->
         <h:PiePlot
             Grid.Column="1"
             Grid.RowSpan="2"
@@ -68,7 +38,7 @@
                 <h:PieSeries ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" LegendDescription="Only Series"/>
             </h:PiePlot.Series>
         </h:PiePlot>
-        <!--<h:LinePlot 
+        <h:AreaPlot 
             Grid.Column="0"
             Grid.Row="0"
             FontSize="15"
@@ -76,7 +46,7 @@
             PaddingFactor="1.2"
             Padding="10"
             PlotColors="{ThemeResource PlotColors}">
-            <h:LinePlot.XAxis>
+            <h:AreaPlot.XAxis>
                 <h:XAxis Description="X Axis Description">
                     <h:XAxis.LabelTransform>
                         <TransformGroup>
@@ -85,28 +55,28 @@
                         </TransformGroup>
                     </h:XAxis.LabelTransform>
                 </h:XAxis>
-            </h:LinePlot.XAxis>
-            <h:LinePlot.YAxis>
+            </h:AreaPlot.XAxis>
+            <h:AreaPlot.YAxis>
                 <h:YAxis Name="Category1" Description="Primary Y Axis Description"/>
                 <h:YAxis Name="Category2" Description="Secondary Y Axis Description"/>
-            </h:LinePlot.YAxis>
-            <h:LinePlot.Series>
-                <h:Series ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Series descrepancy relative to zero"/>
-                <h:Series ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
-                <h:Series ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>
-            </h:LinePlot.Series>
-            <h:LinePlot.ToolTipStyle>
+            </h:AreaPlot.YAxis>
+            <h:AreaPlot.Series>
+                <h:CartesianSeries ItemsSource="{Binding Data5}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Series descrepancy relative to zero"/>
+                <!--<h:CartesianSeries ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
+                <h:CartesianSeries ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>-->
+            </h:AreaPlot.Series>
+            <h:AreaPlot.ToolTipStyle>
                 <Style TargetType="h:SeriesPointToolTip">
                     <Setter Property="Background" Value="Black"/>
                     <Setter Property="Foreground" Value="Gray"/>
                     <Setter Property="BorderBrush" Value="Gray"/>
                     <Setter Property="BorderThickness" Value="2"/>
                 </Style>
-            </h:LinePlot.ToolTipStyle>
-        </h:LinePlot>
+            </h:AreaPlot.ToolTipStyle>
+        </h:AreaPlot>
         <h:BarPlot
-            Grid.Column="1"
-            Grid.Row="0"
+            Grid.Column="0"
+            Grid.Row="1"
             FontSize="15"
             DataContext="{x:Bind ViewModel}"
             PaddingFactor="1.2"
@@ -127,9 +97,9 @@
                 <h:YAxis Name="Category2" Description="Secondary Y Axis Description"/>
             </h:BarPlot.YAxis>
             <h:BarPlot.Series>
-                <h:Series ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Series descrepancy relative to zero"/>
-                <h:Series ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
-                <h:Series ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>
+                <h:CartesianSeries ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Series descrepancy relative to zero"/>
+                <h:CartesianSeries ItemsSource="{Binding Data2}" ValueName="Value" ValueFormat="{}{0:n2}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription=" XX YY ZZ" PointBulletSize="20"/>
+                <h:CartesianSeries ItemsSource="{Binding Data3}" ValueName="Value" ValueFormat="{}{0:c}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category2" LegendDescription="0987654321" PointBulletSize="0"/>
             </h:BarPlot.Series>
             <h:BarPlot.ToolTipStyle>
                 <Style TargetType="h:SeriesPointToolTip">
@@ -139,41 +109,7 @@
                     <Setter Property="BorderThickness" Value="2"/>
                 </Style>
             </h:BarPlot.ToolTipStyle>
-        </h:BarPlot>-->
-        <!--<h:LinePlot 
-            Grid.Column="0"
-            Grid.Row="1"
-            FontSize="15"
-            DataContext="{x:Bind ViewModel}"
-            PaddingFactor="1.05"
-            Padding="10"
-            PlotColors="{ThemeResource PlotColors}">
-            <h:LinePlot.XAxis>
-                <h:XAxis Description="X Axis Description">
-                    <h:XAxis.LabelTransform>
-                        <TransformGroup>
-                            <RotateTransform Angle="45"/>
-                            <TranslateTransform X="40" Y="5"/>
-                        </TransformGroup>
-                    </h:XAxis.LabelTransform>
-                </h:XAxis>
-            </h:LinePlot.XAxis>
-            <h:LinePlot.YAxis>
-                <h:YAxis Name="Category1" Description="Primary Y Axis Description"/>
-            </h:LinePlot.YAxis>
-            <h:LinePlot.Series>
-                <h:CartesianSeries ItemsSource="{Binding Data4}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Ledgers"/>
-                <h:CartesianSeries ItemsSource="{Binding Data4_1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" CategoryFormat="{}{0:d}" AxisName="Category1" LegendDescription="Ledgers2"/>
-            </h:LinePlot.Series>
-            <h:LinePlot.ToolTipStyle>
-                <Style TargetType="h:SeriesPointToolTip">
-                    <Setter Property="Background" Value="Black"/>
-                    <Setter Property="Foreground" Value="Gray"/>
-                    <Setter Property="BorderBrush" Value="Gray"/>
-                    <Setter Property="BorderThickness" Value="2"/>
-                </Style>
-            </h:LinePlot.ToolTipStyle>
-        </h:LinePlot>-->
+        </h:BarPlot>
         <StackPanel
             Grid.ColumnSpan="2"
             Grid.Row="2"

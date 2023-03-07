@@ -10,7 +10,10 @@
                     <me:SolidColorBrush Color="CornflowerBlue"/>
                 </h:PlotColorItem.StrokeBrush>
                 <h:PlotColorItem.FillBrush>
-                    <me:SolidColorBrush Color="CornflowerBlue"/>
+                    <me:LinearGradientBrush StartPoint="0.5,0"  EndPoint="0.5,1">
+                        <GradientStop Color="LightSkyBlue" Offset="0.0"/>
+                        <GradientStop Color="#55F0FFFF" Offset="1.0"/>
+                    </me:LinearGradientBrush>
                 </h:PlotColorItem.FillBrush>
             </h:PlotColorItem>
             <h:PlotColorItem>
@@ -18,7 +21,10 @@
                     <me:SolidColorBrush Color="Firebrick"/>
                 </h:PlotColorItem.StrokeBrush>
                 <h:PlotColorItem.FillBrush>
-                    <me:SolidColorBrush Color="Firebrick"/>
+                    <me:LinearGradientBrush StartPoint="0.5,0"  EndPoint="0.5,1">
+                        <GradientStop Color="IndianRed" Offset="0.0"/>
+                        <GradientStop Color="#55FFF0F5" Offset="1.0"/>
+                    </me:LinearGradientBrush>
                 </h:PlotColorItem.FillBrush>
             </h:PlotColorItem>
             <h:PlotColorItem>
@@ -26,7 +32,10 @@
                     <me:SolidColorBrush Color="ForestGreen"/>
                 </h:PlotColorItem.StrokeBrush>
                 <h:PlotColorItem.FillBrush>
-                    <me:SolidColorBrush Color="ForestGreen"/>
+                    <me:LinearGradientBrush StartPoint="0.5,0"  EndPoint="0.5,1">
+                        <GradientStop Color="Green" Offset="0.0"/>
+                        <GradientStop Color="#55F5FFFA" Offset="1.0"/>
+                    </me:LinearGradientBrush>
                 </h:PlotColorItem.FillBrush>
             </h:PlotColorItem>
         </h:PlotColorsCollection.Items>

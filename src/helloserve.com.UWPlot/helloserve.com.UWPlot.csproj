@@ -125,6 +125,7 @@
     <Compile Include="BoundsExtentions.cs" />
     <Compile Include="DataExtents.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="AreaPlot.cs" />
     <Compile Include="PiePlot.cs" />
     <Compile Include="PiePlotExtents.cs" />
     <Compile Include="PieSeries.cs" />
