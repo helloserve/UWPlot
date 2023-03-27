@@ -5,7 +5,6 @@ using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Shapes;
 
 namespace helloserve.com.UWPlot
 {
@@ -123,6 +122,8 @@ namespace helloserve.com.UWPlot
                 return availableSize;
 
             //legend
+            double maxLegendDescriptionWidth = 0;
+            double maxLegendValueWidth = 0;
             double maxLegendWidth = 0;
             double maxLegendHeight = 0;
             double legendHeight = 0;
@@ -136,7 +137,17 @@ namespace helloserve.com.UWPlot
 
                     legendHeight += descriptionSize.Height * 1.2;
 
-                    double totalWidth = (descriptionSize.Width + valueSize.Width) * 1.2;
+                    if (descriptionSize.Width > maxLegendDescriptionWidth)
+                    {
+                        maxLegendDescriptionWidth = descriptionSize.Width;
+                    }
+
+                    if (valueSize.Width > maxLegendValueWidth)
+                    {
+                        maxLegendValueWidth = valueSize.Width;
+                    }
+
+                    double totalWidth = (maxLegendDescriptionWidth + maxLegendValueWidth) * 1.5;
                     if (totalWidth > maxLegendWidth)
                     {
                         maxLegendWidth = totalWidth;
@@ -148,9 +159,20 @@ namespace helloserve.com.UWPlot
                     }
                 }
             }
-            
-            PlotExtents.LegendItemIndicatorWidth = maxLegendHeight;            
-            double legendWidth = maxLegendWidth + maxLegendHeight;
+
+            PlotExtents.LegendColumns = 1;
+            while (legendHeight > (PlotExtents.PlotFrameBottomRight.Y - PlotExtents.PlotFrameTopLeft.Y) * 0.8)
+            {
+                PlotExtents.LegendColumns += 1;
+                PlotExtents.Orientation = PiePlotOrientation.Landscape;                
+                legendHeight /= 2;
+            }
+
+            PlotExtents.LegendItemIndicatorWidth = maxLegendHeight;
+            double legendWidth = (maxLegendWidth + maxLegendHeight) * PlotExtents.LegendColumns;
+
+            PlotExtents.LegendColumnWidth = maxLegendWidth + maxLegendHeight;
+            PlotExtents.LegendItemHeight = maxLegendHeight;
 
             if (PlotExtents.Orientation == PiePlotOrientation.Portrait)
             {
@@ -171,8 +193,20 @@ namespace helloserve.com.UWPlot
                 PlotExtents.LegendAreaBottomRight = new Point(PlotExtents.PlotFrameBottomRight.X, PlotExtents.PlotFrameBottomRight.Y - heightRemaining / 2);
             }
 
-            double width = PlotExtents.PlotAreaBottomRight.X - PlotExtents.PlotAreaTopLeft.X;
-            double height = PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y;
+            if (PlotExtents.PlotAreaTopLeft.X < PlotExtents.PlotFrameTopLeft.X || PlotExtents.PlotAreaTopLeft.Y < PlotExtents.PlotFrameTopLeft.Y)
+                PlotExtents.PlotAreaTopLeft = PlotExtents.PlotFrameTopLeft;
+
+            if (PlotExtents.PlotAreaBottomRight.X > PlotExtents.PlotFrameBottomRight.X || PlotExtents.PlotAreaBottomRight.Y > PlotExtents.PlotFrameBottomRight.Y)
+                PlotExtents.PlotAreaBottomRight = PlotExtents.PlotFrameBottomRight;
+            
+            if (PlotExtents.LegendAreaTopLeft.X < PlotExtents.PlotFrameTopLeft.X || PlotExtents.PlotAreaTopLeft.Y < PlotExtents.PlotFrameTopLeft.Y)
+                PlotExtents.LegendAreaTopLeft = PlotExtents.PlotFrameTopLeft;
+
+            if (PlotExtents.LegendAreaBottomRight.X > PlotExtents.PlotFrameBottomRight.X || PlotExtents.LegendAreaBottomRight.Y > PlotExtents.PlotFrameBottomRight.Y)
+                PlotExtents.LegendAreaBottomRight = PlotExtents.PlotFrameBottomRight;
+
+            double width = Math.Max(PlotExtents.FrameWidth * 0.2, Math.Abs(PlotExtents.PlotAreaBottomRight.X - PlotExtents.PlotAreaTopLeft.X));
+            double height = Math.Max(PlotExtents.FrameWidth * 0.2, Math.Abs(PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y));
             PlotExtents.Origin = new Point(PlotExtents.PlotAreaTopLeft.X + width * 0.5, PlotExtents.PlotAreaTopLeft.Y + height * 0.5);
             PlotExtents.Radius = Math.Min(width * 0.5, height * 0.5) * 0.9;
 
@@ -304,13 +338,42 @@ namespace helloserve.com.UWPlot
 
             var colorStep = (double)colorCollection.Items.Count / (double)Series.ItemsDataPoints.Count;
 
-            double heightPerItem = (PlotExtents.LegendAreaBottomRight.Y - PlotExtents.LegendAreaTopLeft.Y) / Series.ItemsDataPoints.Count;
-            for (int i = 0; i < Series.ItemsDataPoints.Count; i++)
+            double height = 0;
+            int sIndex = 0;
+            int columnCount = (int)Math.Round((PlotExtents.LegendAreaBottomRight.Y - PlotExtents.LegendAreaTopLeft.Y) / PlotExtents.LegendItemHeight);
+            int sCount = 0;
+            for (int i = 0; i < PlotExtents.LegendColumns; i++)
             {
-                var item = Series.ItemsDataPoints[i];
-                int colorIndex = (int)Math.Round(colorStep * i);
-                LayoutRoot.DrawLegendItem(item.Category, PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y + (heightPerItem * i), FontSize, PlotExtents.LegendItemIndicatorWidth, colorCollection.Items[colorIndex].FillBrush, PaddingFactor);
-                LayoutRoot.DrawLegendValue(item.ValueText, PlotExtents.LegendAreaBottomRight.X, PlotExtents.LegendAreaTopLeft.Y + (heightPerItem * i), FontSize, Windows.UI.Xaml.TextAlignment.Right);
+                height = 0;
+                sCount = 0;
+                while (sIndex < Series.ItemsDataPoints.Count)
+                {
+                    var item = Series.ItemsDataPoints[sIndex];
+                    int colorIndex = (int)Math.Round(colorStep * sIndex);
+                    double columnX = PlotExtents.LegendAreaTopLeft.X + (i * PlotExtents.LegendColumnWidth);
+                    LayoutRoot.DrawLegendItem(
+                        item.Category, 
+                        columnX, 
+                        PlotExtents.LegendAreaTopLeft.Y + height, 
+                        FontSize, 
+                        PlotExtents.LegendItemIndicatorWidth, 
+                        colorCollection.Items[colorIndex].FillBrush, 
+                        PaddingFactor);
+                    LayoutRoot.DrawLegendValue(
+                        item.ValueText, 
+                        columnX + PlotExtents.LegendColumnWidth - PlotExtents.LegendItemHeight, 
+                        PlotExtents.LegendAreaTopLeft.Y + height, 
+                        FontSize, 
+                        TextAlignment.Right);
+
+                    sCount++;
+                    height += PlotExtents.LegendItemHeight;
+
+                    if (sCount == columnCount)
+                        break;
+
+                    sIndex++;
+                }
             }
         }
 

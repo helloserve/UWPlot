@@ -13,7 +13,7 @@ namespace helloserve.com.UWPlot.Tests
         [DataRow(200330D, 300000D)]
         public void ShouldCalculatedUpperBound(double value, double expected)
         {
-            double actual = value.CalculateUpperBound(out double magnitude);
+            double actual = value.CalculateUpperBound(value, out double magnitude);
             Assert.AreEqual(expected, actual);
         }
     }

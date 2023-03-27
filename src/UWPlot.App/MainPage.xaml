@@ -35,7 +35,7 @@
             PlotColors25="{ThemeResource PiePlotColors25}"
             PlotColors="{ThemeResource PiePlotColors10}">
             <h:PiePlot.Series>
-                <h:PieSeries ItemsSource="{Binding Data1}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" LegendDescription="Only Series"/>
+                <h:PieSeries ItemsSource="{Binding Data6}" ValueName="Value" ValueFormat="{}{0:n}" CategoryName="Category" LegendDescription="Only Series"/>
             </h:PiePlot.Series>
         </h:PiePlot>
         <h:AreaPlot 

@@ -355,8 +355,8 @@ namespace helloserve.com.UWPlot
 
             PlotExtents.LegendItemIndicatorWidth = legendHeight;
             legendWidth += Series.Count * (40 + PlotExtents.LegendItemIndicatorWidth);
-            PlotExtents.LegendAreaTopLeft = new Point(actualWidth * 0.5 - (legendWidth * 0.5), Padding.Top);
-            PlotExtents.LegendAreaBottomRight = new Point(actualWidth * 0.5 + (legendWidth * 0.5), Padding.Top + legendHeight);
+            PlotExtents.LegendAreaTopLeft = new Point(actualWidth * 0.5 - (legendWidth * 0.5), Padding.Top - 5);
+            PlotExtents.LegendAreaBottomRight = new Point(actualWidth * 0.5 + (legendWidth * 0.5), Padding.Top - 5 + legendHeight);
 
             OnMeasureLegend();
 

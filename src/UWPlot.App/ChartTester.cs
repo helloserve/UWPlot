@@ -49,6 +49,7 @@ namespace UWPlot.App
         public ObservableCollection<LedgerPoint> Data4 { get; } = new ObservableCollection<LedgerPoint>();
         public ObservableCollection<LedgerPoint> Data4_1 { get; } = new ObservableCollection<LedgerPoint>();
         public ObservableCollection<LedgerPoint> Data5 { get; } = new ObservableCollection<LedgerPoint>();
+        public ObservableCollection<LedgerPoint> Data6 { get; } = new ObservableCollection<LedgerPoint>();
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -128,6 +129,48 @@ namespace UWPlot.App
             Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data4-9", Value = -6000 });
             Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data4-10", Value = -5000 });
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data5)));
+
+            Data6.Add(new LedgerPoint() { Category = "Ledger 1", Name = "Data6-1", Value = -4500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 2", Name = "Data6-2", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 3", Name = "Data6-3", Value = -65890 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 4", Name = "Data6-4", Value = -24000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 5", Name = "Data6-5", Value = -15000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data6-6", Value = -9000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data6-7", Value = -2500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data6-8", Value = -100 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data6-9", Value = -1000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data6-10", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 11", Name = "Data6-1", Value = -4500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 12", Name = "Data6-2", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 13", Name = "Data6-3", Value = -65890 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 14", Name = "Data6-4", Value = -24000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 15", Name = "Data6-5", Value = -15000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 16", Name = "Data6-6", Value = -9000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 17", Name = "Data6-7", Value = -2500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 18", Name = "Data6-8", Value = -100 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 19", Name = "Data6-9", Value = -1000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 20", Name = "Data6-10", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 21", Name = "Data6-1", Value = -4500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 22", Name = "Data6-2", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 23", Name = "Data6-3", Value = -65890 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 24", Name = "Data6-4", Value = -24000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 25", Name = "Data6-5", Value = -15000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 26", Name = "Data6-6", Value = -9000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 27", Name = "Data6-7", Value = -2500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 28", Name = "Data6-8", Value = -100 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 29", Name = "Data6-9", Value = -1000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 30", Name = "Data6-10", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 31", Name = "Data6-1", Value = -4500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 32", Name = "Data6-2", Value = -3400 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 33", Name = "Data6-3", Value = -65890 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 34", Name = "Data6-4", Value = -24000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 35", Name = "Data6-5", Value = -15000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 36", Name = "Data6-6", Value = -9000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 37", Name = "Data6-7", Value = -2500 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 38", Name = "Data6-8", Value = -100 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 39", Name = "Data6-9", Value = -1000 });
+            Data6.Add(new LedgerPoint() { Category = "Ledger 40", Name = "Data6-10", Value = -3400 });
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data6)));
 
         }
 
