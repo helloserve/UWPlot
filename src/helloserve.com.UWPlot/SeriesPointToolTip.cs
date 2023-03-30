@@ -9,7 +9,19 @@ namespace helloserve.com.UWPlot
 {
     public sealed class SeriesPointToolTip : Control
     {
-        private DependencyObject layoutRoot = null;
+        private DependencyObject _layoutRoot = null;
+        protected DependencyObject LayoutRoot
+        {
+            get
+            {
+                if (_layoutRoot == null)
+                {
+                    _layoutRoot = VisualTreeHelper.GetChild(this, 0);
+                }
+                return _layoutRoot;
+            }
+        }
+
         public SeriesPointToolTip()
         {
             this.DefaultStyleKey = typeof(SeriesPointToolTip);
@@ -18,28 +30,27 @@ namespace helloserve.com.UWPlot
 
         private void SeriesPointToolTip_Loaded(object sender, RoutedEventArgs e)
         {
-            layoutRoot = VisualTreeHelper.GetChild(this, 0);
         }
 
         public Size GetContentSize(Size availableSize)
         {
             Size size = new Size(MinWidth, MinHeight);
 
-            if (layoutRoot == null)
+            if (LayoutRoot == null)
             {
                 return size;
             }
 
-            if (layoutRoot is Border)
+            if (LayoutRoot is Border)
             {
-                Border border = layoutRoot as Border;
+                Border border = LayoutRoot as Border;
                 border.Measure(availableSize);
                 size = border.DesiredSize;
             }
 
-            if (layoutRoot is Panel)
+            if (LayoutRoot is Panel)
             {
-                Panel panel = layoutRoot as Panel;
+                Panel panel = LayoutRoot as Panel;
                 panel.Measure(availableSize);
                 size = panel.DesiredSize;
             }            
@@ -49,12 +60,12 @@ namespace helloserve.com.UWPlot
 
         public void SetDebugText(string value)
         {
-            if (layoutRoot == null)
+            if (LayoutRoot == null)
             {
                 return;
             }
 
-            var debugBlock = (TextBlock)VisualTreeHelper.GetChild(layoutRoot, 0);
+            var debugBlock = (TextBlock)VisualTreeHelper.GetChild(LayoutRoot, 0);
             if (debugBlock == null)
             {
                 return;

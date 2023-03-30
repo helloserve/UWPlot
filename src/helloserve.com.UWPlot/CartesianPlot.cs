@@ -68,10 +68,9 @@ namespace helloserve.com.UWPlot
             if (dataPrepException != null || !string.IsNullOrEmpty(dataValidationErrorMessage))
                 return;
 
-            Point pointerPosition = Windows.UI.Core.CoreWindow.GetForCurrentThread().PointerPosition;
-            double x = Math.Max(0, pointerPosition.X - Window.Current.Bounds.X);
-            double y = Math.Max(0, pointerPosition.Y - Window.Current.Bounds.Y);
-
+            var pointerPosition = e.GetCurrentPoint(this);
+            double x = Math.Max(0, pointerPosition.Position.X);
+            double y = Math.Max(0, pointerPosition.Position.Y);
             if (x < PlotExtents.PlotAreaTopLeft.X || x > PlotExtents.PlotAreaBottomRight.X || y < PlotExtents.PlotAreaTopLeft.Y || y > PlotExtents.PlotAreaBottomRight.Y)
             {
                 return;
@@ -93,7 +92,6 @@ namespace helloserve.com.UWPlot
 
             double xDisplay1 = PlotExtents.PlotAreaBottomRight.X + PlotExtents.PlotAreaTopLeft.X - (xDisplay + size.Width);
             double yDisplay1 = PlotExtents.PlotAreaBottomRight.Y + PlotExtents.PlotAreaTopLeft.Y - (yDisplay + size.Height);
-
 
             ToolTip.Margin = new Thickness(xDisplay, yDisplay, xDisplay1, yDisplay1);
             ToolTip.Visibility = Visibility.Visible;
@@ -132,7 +130,7 @@ namespace helloserve.com.UWPlot
             }
 
             ToolTip.SetDebugText(stringBuilder.ToString());
-            //toolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}\r\nMargin: ({Math.Round(toolTip.Margin.Left)},{Math.Round(toolTip.Margin.Top)})x({Math.Round(toolTip.Margin.Right)},{Math.Round(toolTip.Margin.Bottom)})\r\nPlotArea: ({Math.Round(plotAreaTopLeft.X)},{Math.Round(plotAreaTopLeft.Y)})x({Math.Round(plotAreaBottomRight.X)},{Math.Round(plotAreaBottomRight.Y)})");
+            //ToolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}\r\nMargin: ({Math.Round(ToolTip.Margin.Left)},{Math.Round(ToolTip.Margin.Top)})x({Math.Round(ToolTip.Margin.Right)},{Math.Round(ToolTip.Margin.Bottom)})\r\nPlotArea: ({Math.Round(PlotExtents.PlotAreaTopLeft.X)},{Math.Round(PlotExtents.PlotAreaTopLeft.Y)})x({Math.Round(PlotExtents.PlotAreaBottomRight.X)},{Math.Round(PlotExtents.PlotAreaBottomRight.Y)})");
 
             InvalidateArrange();
         }
