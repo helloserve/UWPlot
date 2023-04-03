@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -58,6 +59,9 @@ namespace helloserve.com.UWPlot
 
         public static void DrawLine(this Canvas layoutRoot, double x1, double y1, double x2, double y2, Brush strokeColor, double strokeThickness)
         {
+            if (Double.IsNaN(x1) || Double.IsNaN(y1) || Double.IsNaN(x2) || Double.IsNaN(y2))
+                return;
+
             var line = new Line();
             line.X1 = x1;
             line.Y1 = y1;
@@ -65,6 +69,7 @@ namespace helloserve.com.UWPlot
             line.Y2 = y2;
             line.Stroke = strokeColor;
             line.StrokeThickness = strokeThickness;
+            line.StrokeEndLineCap = PenLineCap.Round;
 
             layoutRoot.Children.Add(line);
         }

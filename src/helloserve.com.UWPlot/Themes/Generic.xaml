@@ -8,7 +8,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="local:Plot">
                     <Canvas
-                        Background="{TemplateBinding Background}"
+                        Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
                         IsHitTestVisible="True">
                     </Canvas>
                 </ControlTemplate>

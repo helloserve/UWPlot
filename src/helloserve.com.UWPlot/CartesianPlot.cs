@@ -61,6 +61,7 @@ namespace helloserve.com.UWPlot
         private void LayoutRoot_PointerExited(object sender, PointerRoutedEventArgs e)
         {
             ToolTip.Visibility = Visibility.Collapsed;
+            System.Diagnostics.Debug.WriteLine("Hiding Tooltip");
         }
 
         private void LayoutRoot_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -131,6 +132,8 @@ namespace helloserve.com.UWPlot
 
             ToolTip.SetDebugText(stringBuilder.ToString());
             //ToolTip.SetDebugText($"Desired Size: {size.Width}x{size.Height}\r\nMargin: ({Math.Round(ToolTip.Margin.Left)},{Math.Round(ToolTip.Margin.Top)})x({Math.Round(ToolTip.Margin.Right)},{Math.Round(ToolTip.Margin.Bottom)})\r\nPlotArea: ({Math.Round(PlotExtents.PlotAreaTopLeft.X)},{Math.Round(PlotExtents.PlotAreaTopLeft.Y)})x({Math.Round(PlotExtents.PlotAreaBottomRight.X)},{Math.Round(PlotExtents.PlotAreaBottomRight.Y)})");
+
+            System.Diagnostics.Debug.WriteLine($"Desired Size: {size.Width}x{size.Height}\r\nMargin: ({Math.Round(ToolTip.Margin.Left)},{Math.Round(ToolTip.Margin.Top)})x({Math.Round(ToolTip.Margin.Right)},{Math.Round(ToolTip.Margin.Bottom)})\r\nPlotArea: ({Math.Round(PlotExtents.PlotAreaTopLeft.X)},{Math.Round(PlotExtents.PlotAreaTopLeft.Y)})x({Math.Round(PlotExtents.PlotAreaBottomRight.X)},{Math.Round(PlotExtents.PlotAreaBottomRight.Y)})");
 
             InvalidateArrange();
         }

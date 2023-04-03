@@ -95,6 +95,8 @@ namespace helloserve.com.UWPlot
                     var categoryValue = categoryPropertyInfo.GetValue(item);
                     var displayValue = string.IsNullOrEmpty(DisplayName) ? string.Empty : displayPropertyInfo.GetValue(item);
                     var value = (double?)valuePropertyInfo.GetValue(item);
+                    if (value == double.NaN)
+                        value = 0;
 
                     var dataPoint = new SeriesDataPoint()
                     {

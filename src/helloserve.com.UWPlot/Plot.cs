@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Windows.Foundation;
+using Windows.Security.Isolation;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -84,6 +85,14 @@ namespace helloserve.com.UWPlot
             SizeChanged += Plot_SizeChanged;
 
             IsHitTestVisible = true;
+
+            if (Background == null || Background is SolidColorBrush)
+            {
+                if (Background == null || (Background as SolidColorBrush).Color == Colors.Transparent)
+                {
+                    Background = (SolidColorBrush)Application.Current.Resources["SystemControlPageBackgroundChromeLowBrush"];
+                }
+            }
         }
 
         private bool hasDrawn = false;
@@ -247,7 +256,15 @@ namespace helloserve.com.UWPlot
             }
             else
             {
-                Draw();
+                try
+                {
+                    Draw();
+                }
+                catch (Exception ex)
+                {
+                    dataValidationErrorMessage = ex.Message;
+                    DrawSelf();
+                }
             }
 
             hasDrawn = true;
