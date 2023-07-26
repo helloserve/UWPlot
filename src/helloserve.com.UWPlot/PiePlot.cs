@@ -217,7 +217,7 @@ namespace helloserve.com.UWPlot
         {
             if (dataPrepException != null)
             {
-                dataValidationErrorMessage = dataPrepException.Message;
+                dataValidationErrorMessage = $"{dataPrepException.Message}{Environment.NewLine}{dataPrepException.StackTrace}";
                 return false;
             }
 

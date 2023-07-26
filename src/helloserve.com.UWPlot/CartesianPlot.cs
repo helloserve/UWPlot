@@ -51,7 +51,10 @@ namespace helloserve.com.UWPlot
         }
 
         protected override void HandlePlotLoaded(object sender, RoutedEventArgs e)
-        {            
+        {
+            if (LayoutRoot == null)
+                return;
+
             LayoutRoot.PointerMoved += LayoutRoot_PointerMoved;
             LayoutRoot.PointerExited += LayoutRoot_PointerExited;
             ToolTip.Visibility = Visibility.Collapsed;
@@ -161,7 +164,7 @@ namespace helloserve.com.UWPlot
                     SeriesMetaData meta = series.PrepareData(DataContext, FontSize, YAxis[0].LabelTransform);
                     hasData |= meta.Count > 0;
 
-                    if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory.Length > extents.LongestCategory.Length)
+                    if (string.IsNullOrEmpty(extents.LongestCategory) || meta.LongestCategory?.Length > extents.LongestCategory.Length)
                     {
                         extents.LongestCategory = meta.LongestCategory;
                     }
@@ -203,7 +206,7 @@ namespace helloserve.com.UWPlot
             {               
                 if (dataPrepException != null)
                 {
-                    message = dataPrepException.Message;
+                    message = $"{dataPrepException.Message}{Environment.NewLine}{dataPrepException.StackTrace}";
                 }
                 else
                 {
@@ -409,10 +412,10 @@ namespace helloserve.com.UWPlot
             OnMeasureSecondaryYAxis();
 
             Size measuredSize = new Size(
-                (PlotExtents.PlotFrameBottomRight.X + (hasSecondaryY ? valueTextMaxSize.Width : 0)) - (PlotExtents.PlotFrameTopLeft.X - valueTextMaxSize.Width),
-                (PlotExtents.LegendAreaBottomRight.Y - PlotExtents.LegendAreaTopLeft.Y) + (PlotExtents.PlotFrameBottomRight.Y - PlotExtents.PlotFrameTopLeft.Y) + categoryTextMaxSize.Height);
+                Math.Max(0, (PlotExtents.PlotFrameBottomRight.X + (hasSecondaryY ? valueTextMaxSize.Width : 0)) - (PlotExtents.PlotFrameTopLeft.X - valueTextMaxSize.Width)),
+                Math.Max(0, (PlotExtents.LegendAreaBottomRight.Y - PlotExtents.LegendAreaTopLeft.Y) + (PlotExtents.PlotFrameBottomRight.Y - PlotExtents.PlotFrameTopLeft.Y) + categoryTextMaxSize.Height));
 
-            return new Size(Math.Max(availableSize.Width, measuredSize.Width), Math.Max(availableSize.Height, measuredSize.Height));
+            return new Size(Math.Max(0, Math.Max(availableSize.Width, measuredSize.Width)), Math.Max(0, Math.Max(availableSize.Height, measuredSize.Height)));
         }
 
         protected virtual void OnMeasureLegend() { }

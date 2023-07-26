@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Windows.Foundation;
-using Windows.Security.Isolation;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -262,7 +261,7 @@ namespace helloserve.com.UWPlot
                 }
                 catch (Exception ex)
                 {
-                    dataValidationErrorMessage = ex.Message;
+                    dataValidationErrorMessage = $"{ex.Message}{Environment.NewLine}{ex.StackTrace}";
                     DrawSelf();
                 }
             }
@@ -292,9 +291,19 @@ namespace helloserve.com.UWPlot
                 StrokeThickness = 2
             });
 
+            string exceptionText = dataValidationErrorMessage;
+            if (string.IsNullOrEmpty(exceptionText) && dataPrepException != null)
+            {
+                exceptionText = $"{dataPrepException?.Message}{Environment.NewLine}{dataPrepException?.StackTrace}";
+            }
+            else
+            {
+                exceptionText = "Data Error";
+            }
+
             LayoutRoot.Children.Add(new TextBlock()
             {
-                Text = dataValidationErrorMessage ?? dataPrepException?.Message ?? "Data Error",
+                Text = exceptionText,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             });
