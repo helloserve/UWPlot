@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Windows.UI.Xaml.Media;
+using Windows.Gaming.Input.Custom;
+using Windows.Media.Streaming.Adaptive;
+
+
 
 #if DEBUG
 using System.Diagnostics;    
@@ -51,23 +55,45 @@ namespace helloserve.com.UWPlot
             try
             {
                 var type = dataContext.GetType();
+                Type sourceType = null;
 
                 if (contextType is null || type != contextType || sourceProperty is null)
                 {
                     contextType = type;
 
                     var sourceBinding = ItemsSource as Windows.UI.Xaml.Data.Binding;
-                    sourceProperty = type.GetProperty(sourceBinding.Path?.Path);
-                    if (sourceProperty == null)
+                    if (sourceBinding != null)
                     {
-                        throw new ArgumentNullException($"ItemsSource is not a property of {type.Name}.");
+                        sourceProperty = type.GetProperty(sourceBinding.Path?.Path);
+                        if (sourceProperty == null)
+                        {
+                            throw new ArgumentNullException($"ItemsSource is not a property of {type.Name}.");
+                        }
+
+                        ItemsCollection = sourceProperty.GetValue(dataContext) as IEnumerable;
+
+                        sourceType = sourceProperty.PropertyType;
+
+                        if (sourceType.GetInterface(nameof(IEnumerable)) is null)
+                        {
+                            throw new ArgumentException($"ItemsSource is configured with {sourceBinding.Path.Path}, but it doesn't implement IEnumerable.");
+                        }
                     }
-
-                    var sourceType = sourceProperty.PropertyType;
-
-                    if (sourceType.GetInterface(nameof(IEnumerable)) is null)
+                    else
                     {
-                        throw new ArgumentException($"ItemsSource is configured with {sourceBinding.Path.Path}, but it doesn't implement IEnumerable.");
+                        if (ItemsSource == null)
+                            return SeriesMetaData.Empty;
+
+                        var collection = ItemsSource as IEnumerable;
+
+                        if (collection == null)
+                        {
+                            throw new ArgumentException($"ItemsSource is of type {ItemsSource.GetType().Name} and doesn't implement IEnumerable.");
+                        }
+
+                        ItemsCollection = collection;
+
+                        sourceType = collection.GetType();
                     }
 
                     if (sourceType.GenericTypeArguments is null || sourceType.GenericTypeArguments.Length == 0)
@@ -83,9 +109,7 @@ namespace helloserve.com.UWPlot
                     {
                         displayPropertyInfo = sourceGenericType.GetProperty(DisplayName);
                     }
-                }
-
-                ItemsCollection = sourceProperty.GetValue(dataContext) as IEnumerable;
+                }                
 
                 ItemsDataPoints = new List<SeriesDataPoint>();
                 var meta = new SeriesMetaData();

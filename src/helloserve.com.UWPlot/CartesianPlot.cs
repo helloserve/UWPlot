@@ -379,7 +379,10 @@ namespace helloserve.com.UWPlot
             OnMeasurePlotArea();
 
             PlotExtents.VerticalGridLineCount = Series[0].ItemsDataPoints.Count - 2;
-            PlotExtents.VerticalGridLineSpace = (PlotExtents.PlotAreaBottomRight.X - PlotExtents.PlotAreaTopLeft.X) / (PlotExtents.VerticalGridLineCount + 1);
+            if (PlotExtents.VerticalGridLineCount + 1 == 0)
+                PlotExtents.VerticalGridLineCount = 1;
+            else
+                PlotExtents.VerticalGridLineSpace = (PlotExtents.PlotAreaBottomRight.X - PlotExtents.PlotAreaTopLeft.X) / (PlotExtents.VerticalGridLineCount + 1);
 
             OnMeasureVerticalGridLines();
 
@@ -486,13 +489,14 @@ namespace helloserve.com.UWPlot
             for (int i = 0; i < PlotExtents.VerticalGridLineCount; i++)
             {
                 LayoutRoot.DrawLine(lineStepX, PlotExtents.PlotFrameTopLeft.Y, lineStepX, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, GridLineStrokeThickness);
-                if ((i + 1) % categoryStep == 0)
+                
+                if (PlotExtents.VerticalGridLineCount >= 1 && (i + 1) % categoryStep == 0)
                 {
                     if (i == PlotExtents.VerticalGridLineCount - 1 && categoryStep > 1)
                         continue;
 
                     LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
-                }
+                }                
 
                 lineStepX += PlotExtents.VerticalGridLineSpace;
             }
@@ -502,7 +506,7 @@ namespace helloserve.com.UWPlot
             double legendX = (PlotExtents.LegendAreaBottomRight.X - PlotExtents.LegendAreaTopLeft.X) * 0.08D;
             foreach (CartesianSeries series in Series)
             {
-                var drawSize = LayoutRoot.DrawLegendItem(series.LegendDescription, legendX + PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, FontSize, PlotExtents.LegendItemIndicatorWidth, PlotColors[Series.IndexOf(series)].StrokeBrush);
+                var drawSize = LayoutRoot.DrawLegendItem(series.LegendDescription, legendX + PlotExtents.LegendAreaTopLeft.X, PlotExtents.LegendAreaTopLeft.Y, FontSize, PlotExtents.LegendItemIndicatorWidth, GetSeriesColor(Series.IndexOf(series)).StrokeBrush);
                 legendX += drawSize.Width;
             }
         }
@@ -569,6 +573,23 @@ namespace helloserve.com.UWPlot
         internal virtual void DrawSeries(SeriesDrawDataPoints[] seriesDataPoints)
         {
 
+        }
+
+        protected virtual PlotColorItem GetSeriesColor(int index)
+        {
+            var ratio = PlotColors.Count / Series.Count;
+
+            int colorIndex = 0;
+            if (ratio <= 0)
+            {
+                colorIndex = index % PlotColors.Count;
+            }
+            else
+            {
+                colorIndex = index * ratio;
+            }
+
+            return PlotColors[colorIndex];
         }
     }
 

@@ -23,6 +23,8 @@ namespace helloserve.com.UWPlot
         {
 
         }
+
+        public int Count => items.Count;
     }
 
     [Bindable]

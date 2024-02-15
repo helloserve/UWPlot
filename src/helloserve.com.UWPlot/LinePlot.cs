@@ -45,7 +45,7 @@ namespace helloserve.com.UWPlot
 
                     if (prevX.HasValue && prevY.HasValue)
                     {
-                        LayoutRoot.DrawLine(prevX.Value, prevY.Value, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, PlotColors[Series.IndexOf(series)].StrokeBrush, LineThickness);
+                        LayoutRoot.DrawLine(prevX.Value, prevY.Value, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, GetSeriesColor(Series.IndexOf(series)).StrokeBrush, LineThickness);
                     }
 
                     prevX = linePlotPoints[i].Item1.X;
@@ -71,7 +71,7 @@ namespace helloserve.com.UWPlot
                         Ellipse point = new Ellipse();
                         point.Width = pointSize;
                         point.Height = pointSize;
-                        point.Fill = PlotColors[Series.IndexOf(series)].StrokeBrush;
+                        point.Fill = GetSeriesColor(Series.IndexOf(series)).StrokeBrush;
 
                         point.Margin = new Thickness(linePlotPoints[i].Item1.X - (point.Width / 2), linePlotPoints[i].Item1.Y - (point.Height / 2), 0, 0);
                         point.DataContext = linePlotPoints[i].Item2;

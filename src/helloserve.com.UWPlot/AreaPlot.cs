@@ -35,6 +35,7 @@ namespace helloserve.com.UWPlot
                 Point? firstPoint = null;
                 Point lastPoint;
                 var pointsArea = new PointCollection();
+                PlotColorItem seriesColor;
 
                 for (int i = 0; i < linePlotPoints.Count; i++)
                 {
@@ -47,7 +48,9 @@ namespace helloserve.com.UWPlot
                             pointsArea.Add(new Point(firstPoint.Value.X, PlotExtents.PlotAreaBottomRight.Y));
                             pointsArea.Add(firstPoint.Value);
 
-                            LayoutRoot.DrawArea(pointsArea, PlotColors[Series.IndexOf(series)].StrokeBrush, LineThickness, PlotColors[Series.IndexOf(series)].FillBrush);
+                            seriesColor = GetSeriesColor(Series.IndexOf(series));
+
+                            LayoutRoot.DrawArea(pointsArea, seriesColor.StrokeBrush, LineThickness, seriesColor.FillBrush);
 
                             pointsArea = new PointCollection();
                         }
@@ -67,29 +70,8 @@ namespace helloserve.com.UWPlot
                 pointsArea.Add(new Point(firstPoint.Value.X, PlotExtents.PlotAreaBottomRight.Y));
                 pointsArea.Add(firstPoint.Value);
 
-
-                LayoutRoot.DrawArea(pointsArea, PlotColors[Series.IndexOf(series)].StrokeBrush, LineThickness, PlotColors[Series.IndexOf(series)].FillBrush);
-
-                //double? prevX = null;
-                //double? prevY = null;
-                
-                //for (int i = 0; i < linePlotPoints.Count; i++)
-                //{
-                //    if (!linePlotPoints[i].Item2.Value.HasValue)
-                //    {
-                //        prevX = null;
-                //        prevY = null;
-                //        continue;
-                //    }
-
-                //    if (prevX.HasValue && prevY.HasValue)
-                //    {
-                //        LayoutRoot.DrawLine(prevX.Value, prevY.Value, linePlotPoints[i].Item1.X, linePlotPoints[i].Item1.Y, PlotColors[Series.IndexOf(series)].StrokeBrush, LineThickness);
-                //    }
-
-                //    prevX = linePlotPoints[i].Item1.X;
-                //    prevY = linePlotPoints[i].Item1.Y;
-                //}
+                seriesColor = GetSeriesColor(Series.IndexOf(series));
+                LayoutRoot.DrawArea(pointsArea, seriesColor.StrokeBrush, LineThickness, seriesColor.FillBrush);
             }
 
             for (int s = 0; s < seriesDataPoints.Length; s++)
@@ -110,7 +92,7 @@ namespace helloserve.com.UWPlot
                         Ellipse point = new Ellipse();
                         point.Width = pointSize;
                         point.Height = pointSize;
-                        point.Fill = PlotColors[Series.IndexOf(series)].StrokeBrush;
+                        point.Fill = GetSeriesColor(Series.IndexOf(series)).StrokeBrush;
 
                         point.Margin = new Thickness(linePlotPoints[i].Item1.X - (point.Width / 2), linePlotPoints[i].Item1.Y - (point.Height / 2), 0, 0);
                         point.DataContext = linePlotPoints[i].Item2;

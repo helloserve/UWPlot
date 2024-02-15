@@ -49,8 +49,9 @@ namespace helloserve.com.UWPlot
 
             for (int i = 0; i < seriesDataPoints.Length; i++)
             {
-                Brush fillColor = PlotColors[i].FillBrush;
-                Brush strokeColor = PlotColors[i].StrokeBrush;
+                PlotColorItem seriesColor = GetSeriesColor(i);
+                Brush fillColor = seriesColor.FillBrush;
+                Brush strokeColor = seriesColor.StrokeBrush;
                 double seriesXOffset = - barXOffset + (i * thickness) + (thickness / 2);
 
                 foreach (var point in seriesDataPoints[i].SeriesDataPoints)
