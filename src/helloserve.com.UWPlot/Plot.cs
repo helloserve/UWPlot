@@ -154,7 +154,9 @@ namespace helloserve.com.UWPlot
 
         protected override Size MeasureOverride(Size availableSize)
         {
+#if DEBUG
             var sw = Stopwatch.StartNew();
+#endif
 
             try
             {
@@ -192,7 +194,9 @@ namespace helloserve.com.UWPlot
 
         protected override Size ArrangeOverride(Size finalSize)
         {
+#if DEBUG
             var sw = Stopwatch.StartNew();
+#endif
 
             try
             {

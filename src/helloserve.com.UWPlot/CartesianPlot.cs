@@ -200,7 +200,9 @@ namespace helloserve.com.UWPlot
 
         protected override bool ValidateSeries()
         {
+#if DEBUG
             var sw = Stopwatch.StartNew();
+#endif
             string message = null;
             try
             {               
@@ -298,7 +300,9 @@ namespace helloserve.com.UWPlot
             if (!ValidateSeries())
                 return;
 
+#if DEBUG
             var sw = Stopwatch.StartNew();
+#endif
 
             try
             {

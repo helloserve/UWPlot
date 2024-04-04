@@ -50,8 +50,9 @@ namespace helloserve.com.UWPlot
                 return SeriesMetaData.Empty;
             }
 
+#if DEBUG
             var sw = Stopwatch.StartNew();
-
+#endif
             try
             {
                 var type = dataContext.GetType();

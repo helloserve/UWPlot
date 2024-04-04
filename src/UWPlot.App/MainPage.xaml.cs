@@ -22,7 +22,19 @@ namespace UWPlot.App
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            ViewModel.Initialize();
+            HandleInitAsync();
+        }
+
+        private async void HandleInitAsync()
+        {
+            try
+            {
+                await ViewModel.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         private void Button_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

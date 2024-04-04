@@ -10,7 +10,7 @@ namespace helloserve.com.UWPlot
     public sealed class SeriesPointToolTip : Control
     {
         private DependencyObject _layoutRoot = null;
-        protected DependencyObject LayoutRoot
+        public DependencyObject LayoutRoot
         {
             get
             {
