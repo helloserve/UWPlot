@@ -199,12 +199,6 @@ namespace helloserve.com.UWPlot
             if (PlotExtents.PlotAreaBottomRight.X > PlotExtents.PlotFrameBottomRight.X || PlotExtents.PlotAreaBottomRight.Y > PlotExtents.PlotFrameBottomRight.Y)
                 PlotExtents.PlotAreaBottomRight = PlotExtents.PlotFrameBottomRight;
             
-            if (PlotExtents.LegendAreaTopLeft.X < PlotExtents.PlotFrameTopLeft.X || PlotExtents.PlotAreaTopLeft.Y < PlotExtents.PlotFrameTopLeft.Y)
-                PlotExtents.LegendAreaTopLeft = PlotExtents.PlotFrameTopLeft;
-
-            if (PlotExtents.LegendAreaBottomRight.X > PlotExtents.PlotFrameBottomRight.X || PlotExtents.LegendAreaBottomRight.Y > PlotExtents.PlotFrameBottomRight.Y)
-                PlotExtents.LegendAreaBottomRight = PlotExtents.PlotFrameBottomRight;
-
             double width = Math.Max(PlotExtents.FrameWidth * 0.2, Math.Abs(PlotExtents.PlotAreaBottomRight.X - PlotExtents.PlotAreaTopLeft.X));
             double height = Math.Max(PlotExtents.FrameWidth * 0.2, Math.Abs(PlotExtents.PlotAreaBottomRight.Y - PlotExtents.PlotAreaTopLeft.Y));
             PlotExtents.Origin = new Point(PlotExtents.PlotAreaTopLeft.X + width * 0.5, PlotExtents.PlotAreaTopLeft.Y + height * 0.5);
