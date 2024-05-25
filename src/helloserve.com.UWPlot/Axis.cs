@@ -80,6 +80,8 @@ namespace helloserve.com.UWPlot
         /// <param name="numberOfLines"></param>
         public void Measure(double seriesMaxValue, double seriesMinValue, int numberOfLines)
         {
+            var range = Math.Abs(seriesMaxValue - seriesMinValue);
+
             if (Min.HasValue)
             {
                 CalculatedMin = Min.Value;
@@ -88,9 +90,9 @@ namespace helloserve.com.UWPlot
             {
                 double magnitude = 0;
                 if (seriesMinValue < 0)
-                    CalculatedMin = seriesMinValue.CalculateUpperBound(null, out magnitude);
+                    CalculatedMin = seriesMinValue.CalculateUpperBound(range, out magnitude);
                 else
-                    CalculatedMin = seriesMinValue.CalculateLowerBound(null, out magnitude);
+                    CalculatedMin = seriesMinValue.CalculateLowerBound(range, out magnitude);
             }
 
             if (Max.HasValue)
@@ -101,9 +103,9 @@ namespace helloserve.com.UWPlot
             {
                 double magnitude = 0;
                 if (seriesMaxValue < 0)
-                    CalculatedMax = seriesMaxValue.CalculateLowerBound(null, out magnitude);
+                    CalculatedMax = seriesMaxValue.CalculateLowerBound(range, out magnitude);
                 else
-                    CalculatedMax = seriesMaxValue.CalculateUpperBound(null, out magnitude);
+                    CalculatedMax = seriesMaxValue.CalculateUpperBound(range, out magnitude);
             }
 
             if (Increment.HasValue)
