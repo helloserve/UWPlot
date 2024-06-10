@@ -11,6 +11,16 @@ namespace helloserve.com.UWPlot
             return bound;
         }
 
+        public static double CalculateUpperBound(this double value, double magnitude)
+        {
+            if (value < 0)
+                return Math.Abs(value).CalculateUpperBound(magnitude) * -1;
+
+            double bound = Math.Ceiling(value / magnitude) * magnitude;
+
+            return bound;
+        }
+
         private static double CalculateUpperBoundFromValue(this double value, double? range, out double magnitude)
         {
             if (value < 0)
@@ -39,8 +49,10 @@ namespace helloserve.com.UWPlot
             if (value < 100000)
                 return value.CalculateUpperBoundWithMagnitude(10000, out magnitude);
 
-            var whole = (int)value;
-            magnitude = Math.Pow(10, Math.Max(1, whole.ToString().Length - 1));
+            if (value < 1000000)
+                return value.CalculateUpperBoundWithMagnitude(100000, out magnitude);
+
+            magnitude = value.GetMagnitude();
 
             return value.CalculateUpperBoundWithMagnitude(magnitude, out magnitude);
         }
@@ -55,12 +67,25 @@ namespace helloserve.com.UWPlot
                 {
                     whole += magnitude;
                 }
+
+                return whole;
             }
 
             if (magnitude == 1)
                 return Math.Ceiling(value);
 
-            return (Math.Truncate(value / magnitude) + 1) * magnitude;
+            double bound = (Math.Truncate(value / magnitude) + 1) * magnitude;
+
+            if ((bound % value) / value > 0.25)
+            {
+                double step = magnitude * 0.1;
+                double rounded = Math.Truncate(value / magnitude) * magnitude;
+                double margin = (Math.Ceiling((value % rounded) / step) + 1) * step;
+
+                bound = rounded + margin;
+            }
+
+            return bound;
         }
 
         public static double CalculateLowerBound(this double value, double? range, out double magnitude)
@@ -72,23 +97,8 @@ namespace helloserve.com.UWPlot
             
             if (range < 1)
             {
-                int count = 0;
-                var c = value;
-                while (c < 1)
-                {
-                    c = c * 10;
-                    count++;
-                }
-
-                magnitude = 1D / Math.Pow(10, count);
-
-                whole = 1;
-                while (whole > value)
-                {
-                    whole -= magnitude;
-                }
-
-                return whole;
+                magnitude = GetMagnitude(value);
+                return Math.Ceiling((1 % value) / magnitude) * magnitude;
             }
 
             if (range.HasValue && range < 10)
@@ -97,7 +107,7 @@ namespace helloserve.com.UWPlot
                 return (double)whole;
             }
 
-            magnitude = Math.Pow(10, Math.Max(1, whole.ToString().Length - 1));
+            magnitude = whole.GetMagnitude();
 
             var bound = Math.Round(value / magnitude) * magnitude;
 
@@ -112,6 +122,29 @@ namespace helloserve.com.UWPlot
             }
 
             return bound;
+        }
+
+        public static double CalculateLowerBound(this double value, double magnitude)
+        {
+            if (value < 0)
+                return Math.Abs(value).CalculateLowerBound(magnitude) * -1;
+
+            double bound = Math.Floor(value / magnitude) * magnitude;
+
+            return bound;
+        }
+
+        public static double GetMagnitude(this double value)
+        {
+            if (value < 0)
+                return GetMagnitude(Math.Abs(value));
+
+            var magnitude = Math.Pow(10, Math.Ceiling(Math.Log10(value)) - 1);
+
+            if (magnitude == 0)
+                return 1;
+
+            return magnitude;
         }
     }
 }

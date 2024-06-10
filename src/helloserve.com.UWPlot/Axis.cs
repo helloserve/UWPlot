@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Linq;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 
 namespace helloserve.com.UWPlot
@@ -232,6 +230,7 @@ namespace helloserve.com.UWPlot
                         if (indexValue < overallMin)
                             overallMin = indexValue.Value;
                     }
+
                     var difference = Math.Abs(indexValue.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
                     var roundedDifference = difference.CalculateUpperBound(difference, out double magnitude);
                     if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
@@ -243,6 +242,25 @@ namespace helloserve.com.UWPlot
                         seriesMagnitudes[i][magnitude]++;
                     else
                         seriesMagnitudes[i].Add(magnitude, 1);
+
+                    //compare with other series
+                    for (int s = 0; s < series.Count; s++)
+                    {
+                        if (s == i)
+                            continue;
+
+                        difference = Math.Abs(indexValue.GetValueOrDefault() - series[s][p].Value.GetValueOrDefault());
+                        roundedDifference = difference.CalculateUpperBound(difference, out magnitude);
+                        if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
+                            seriesDifferencesRounded[i][roundedDifference]++;
+                        else
+                            seriesDifferencesRounded[i].Add(roundedDifference, 1);
+
+                        if (seriesMagnitudes[i].ContainsKey(magnitude))
+                            seriesMagnitudes[i][magnitude]++;
+                        else
+                            seriesMagnitudes[i].Add(magnitude, 1);
+                    }
                 }
 
                 foreach (var key in seriesDifferencesRounded[i].Keys)
@@ -274,9 +292,9 @@ namespace helloserve.com.UWPlot
             else
             {
                 if (overallMin < 0)
-                    CalculatedMin = overallMin.CalculateUpperBound(overallDifference, out magnitudeMin);
+                    CalculatedMin = overallMin.CalculateUpperBound(mostMagnitude);
                 else
-                    CalculatedMin = overallMin.CalculateLowerBound(overallDifference, out magnitudeMin);
+                    CalculatedMin = overallMin.CalculateLowerBound(mostMagnitude);
             }
 
             if (Max.HasValue)
@@ -286,9 +304,9 @@ namespace helloserve.com.UWPlot
             else
             {
                 if (overallMax < 0)
-                    CalculatedMax = overallMax.CalculateLowerBound(overallDifference, out magnitudeMax);
+                    CalculatedMax = overallMax.CalculateLowerBound(mostMagnitude);
                 else
-                    CalculatedMax = overallMax.CalculateUpperBound(overallDifference, out magnitudeMax);
+                    CalculatedMax = overallMax.CalculateUpperBound(mostMagnitude);
             }
 
             if (magnitudeMax > magnitudeMin)
@@ -304,8 +322,8 @@ namespace helloserve.com.UWPlot
                 else
                     CalculatedMax = magnitudeMin * (CalculatedMax / Math.Abs(CalculatedMax));
             }
-            MagnitudeMin = magnitudeMin;
-            MagnitudeMax = magnitudeMax;
+            MagnitudeMin = mostMagnitude;
+            MagnitudeMax = mostMagnitude;
             BaseMagnitude = mostMagnitude;
         }
 
@@ -323,7 +341,15 @@ namespace helloserve.com.UWPlot
             while (idealNumberOfLines % 2 != 0)
                 idealNumberOfLines--;
 
-            int numberOfLines = CalculateNumberOfLines(MagnitudeMin, MagnitudeMax, BaseMagnitude, idealNumberOfLines);
+            double calculatedMin = CalculatedMin;
+            double calculatedMax = CalculatedMax;
+            double calculatedIncrement = CalculatedIncrement;
+
+            int numberOfLines = CalculateNumberOfLines(ref calculatedMin, ref calculatedMax, ref calculatedIncrement, MagnitudeMin, MagnitudeMax, BaseMagnitude, idealNumberOfLines);
+
+            CalculatedMin = calculatedMin;
+            CalculatedMax = calculatedMax;
+            CalculatedIncrement = calculatedIncrement;
 
             double heightIncrements = height / numberOfLines;
 
@@ -341,35 +367,40 @@ namespace helloserve.com.UWPlot
             };
         }
 
-        private int CalculateNumberOfLines(double minMagnitude, double maxMagnitude, double mostMagnitude, int idealNumberOfLines)
+        private static int CalculateNumberOfLines(ref double calculatedMin, ref double calculatedMax, ref double calculatedIncrement, double minMagnitude, double maxMagnitude, double mostMagnitude, int idealNumberOfLines)
         {
-            CalculatedIncrement = mostMagnitude;
-            int numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+            if (calculatedMax > 0 && calculatedMin < 0)
+            {
+                return CalculateNumberOfLinesWithZero(ref calculatedMin, ref calculatedMax, ref calculatedIncrement, minMagnitude, maxMagnitude, mostMagnitude, idealNumberOfLines);
+            }
+
+            calculatedIncrement = mostMagnitude;
+            int numberOfLines = (int)Math.Round((double)Math.Abs(calculatedMax - calculatedMin) / calculatedIncrement);
 
             if (idealNumberOfLines == 0)
             {
                 numberOfLines = 1;
-                CalculatedIncrement = CalculatedMax - CalculatedMin;
+                calculatedIncrement = calculatedMax - calculatedMin;
             }
             else
             {
+                double differenceMagnitude = (calculatedMax - calculatedMin).GetMagnitude();
+
                 while (numberOfLines > (idealNumberOfLines + 1) 
-                    && (CalculatedIncrement * 10 < maxMagnitude && CalculatedMax != 0)
-                    && (CalculatedIncrement * 10 < minMagnitude && CalculatedMin != 0))
+                    && (calculatedIncrement * 10 < differenceMagnitude))
                 {
-                    CalculatedIncrement *= 10;
-                    numberOfLines = (int)Math.Round((double)Math.Abs(CalculatedMax - CalculatedMin) / CalculatedIncrement);
+                    calculatedIncrement *= 10;
+                    numberOfLines = (int)Math.Round((double)Math.Abs(calculatedMax - calculatedMin) / calculatedIncrement);
                 }
             }
 
             if (numberOfLines > idealNumberOfLines + 1)
             {
                 //now we need to handle cases where it's funny
-                var maxPart = CalculatedMax / maxMagnitude;
-                var minPart = CalculatedMin / minMagnitude;
+                var maxPart = Math.Ceiling(calculatedMax / maxMagnitude);
+                var minPart = Math.Floor(calculatedMin / minMagnitude);
                 var isMaxEven = maxPart % 2 == 0;
                 var isMinEven = minPart % 2 == 0;
-                var isDifferenceEven = (maxPart - minPart) % 2 == 0;
 
                 while (!isMaxEven || !isMinEven)
                 {
@@ -391,21 +422,45 @@ namespace helloserve.com.UWPlot
 
                     isMaxEven = maxPart % 2 == 0;
                     isMinEven = minPart % 2 == 0;
-                    isDifferenceEven = (maxPart - minPart) % 2 == 0;
                 }
 
-                CalculatedMin = minPart * minMagnitude;
-                CalculatedMax = maxPart * maxMagnitude;
+                calculatedMin = minPart * minMagnitude;
+                calculatedMax = maxPart * maxMagnitude;
                 numberOfLines = idealNumberOfLines;
-                CalculatedIncrement = (CalculatedMax - CalculatedMin) / numberOfLines;
-                while (CalculatedIncrement % 10 != 0 && numberOfLines > 0)
+                calculatedIncrement = (calculatedMax - calculatedMin) / numberOfLines;
+                while (calculatedIncrement % 10 != 0 && numberOfLines > 2)
                 {
                     numberOfLines--;
-                    CalculatedIncrement = (CalculatedMax - CalculatedMin) / numberOfLines;
+                    calculatedIncrement = (calculatedMax - calculatedMin) / numberOfLines;
                 }
             }
 
             return numberOfLines;
+        }
+
+        private static int CalculateNumberOfLinesWithZero(ref double calculatedMin, ref double calculatedMax, ref double calculatedIncrement, double minMagnitude, double maxMagnitude, double mostMagnitude, int idealNumberOfLines)
+        {
+            double overallDiff = calculatedMax - calculatedMin;
+            double positivePortion = calculatedMax / overallDiff;
+            double negativePortion = Math.Abs(calculatedMin) / overallDiff;
+            int idealNumberOfPositiveLines = (int)Math.Round(idealNumberOfLines * positivePortion);
+            int idealNumberOfNegativeLines = (int)Math.Round(idealNumberOfLines * negativePortion);            
+
+            double positiveMax = calculatedMax;
+            double positiveMin = 0;
+            double positiveIncrement = calculatedIncrement;
+            int positiveLines = CalculateNumberOfLines(ref positiveMin, ref positiveMax, ref positiveIncrement, mostMagnitude, mostMagnitude, mostMagnitude, idealNumberOfPositiveLines);
+
+            double negativeMax = 0;
+            double negativeMin = calculatedMin;
+            double negativeIncrement = calculatedIncrement;
+            int negativeLines = CalculateNumberOfLines(ref negativeMin, ref negativeMax, ref negativeIncrement, mostMagnitude, mostMagnitude, mostMagnitude, idealNumberOfNegativeLines);
+
+            calculatedIncrement = positivePortion >= negativePortion ? positiveIncrement : negativeIncrement;
+            calculatedMin = -1 * negativeLines * calculatedIncrement;
+            calculatedMax = positiveLines * calculatedIncrement;
+            
+            return positiveLines + negativeLines;
         }
 
         public enum YAxisType
