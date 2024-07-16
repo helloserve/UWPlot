@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Windows.UI.Xaml.Media;
 
 namespace helloserve.com.UWPlot
@@ -207,50 +208,58 @@ namespace helloserve.com.UWPlot
             double overallMin = double.MaxValue;
             List<Dictionary<double, int>> seriesDifferencesRounded = new List<Dictionary<double, int>>();
             List<Dictionary<double, int>> seriesMagnitudes = new List<Dictionary<double, int>>();
-            for (int i = 0; i < series.Count; i++)
-            {
-                seriesDifferencesRounded.Add(new Dictionary<double, int>());
-                seriesMagnitudes.Add(new Dictionary<double, int>());
 
-                if (series[i].Count > 0 && series[i][0].Value.HasValue)
+            if (series[0].Count == 1)
+            {
+                overallMax = BoundsExtentions.MaxOf(series.Select(x => x[0].Value.GetValueOrDefault()).ToArray());
+                overallMin = BoundsExtentions.MinOf(series.Select(x => x[0].Value.GetValueOrDefault()).ToArray());
+
+                if (overallMax > 0 && overallMin > 0)
                 {
-                    if (series[i][0].Value > overallMax)
-                        overallMax = series[i][0].Value.Value;
-                    if (series[i][0].Value < overallMin)
-                        overallMin = series[i][0].Value.Value;
+                    overallMin = 0;
+                }
+                if (overallMax < 0 && overallMin < 0)
+                {
+                    overallMax = 0;
                 }
 
-                for (int p = 1; p < series[i].Count; p++)
+                BaseMagnitude = BoundsExtentions.MaxOf(series.Select(x => Math.Abs(x[0].Value.GetValueOrDefault())).ToArray()).GetMagnitude();
+                MagnitudeMin = BoundsExtentions.MaxOf(series.Select(x => Math.Abs(x[0].Value.GetValueOrDefault())).ToArray()).GetMagnitude();
+                MagnitudeMax = BaseMagnitude;
+                CalculatedMax = overallMax.CalculateUpperBound(BaseMagnitude);
+                CalculatedMin = overallMin.CalculateLowerBound(BaseMagnitude);                
+            }
+            else
+            {
+                for (int i = 0; i < series.Count; i++)
                 {
-                    var indexValue = series[i][p].Value;
-                    if (indexValue.HasValue)
+                    seriesDifferencesRounded.Add(new Dictionary<double, int>());
+                    seriesMagnitudes.Add(new Dictionary<double, int>());
+
+                    if (series[i].Count > 0 && series[i][0].Value.HasValue)
                     {
-                        if (indexValue > overallMax)
-                            overallMax = indexValue.Value;
-                        if (indexValue < overallMin)
-                            overallMin = indexValue.Value;
+                        if (series[i][0].Value > overallMax)
+                            overallMax = series[i][0].Value.Value;
+                        if (series[i][0].Value < overallMin)
+                            overallMin = series[i][0].Value.Value;
                     }
 
-                    var difference = Math.Abs(indexValue.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
-                    var roundedDifference = difference.CalculateUpperBound(difference, out double magnitude);
-                    if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
-                        seriesDifferencesRounded[i][roundedDifference]++;
-                    else
-                        seriesDifferencesRounded[i].Add(roundedDifference, 1);
-
-                    if (seriesMagnitudes[i].ContainsKey(magnitude))
-                        seriesMagnitudes[i][magnitude]++;
-                    else
-                        seriesMagnitudes[i].Add(magnitude, 1);
-
-                    //compare with other series
-                    for (int s = 0; s < series.Count; s++)
+                    for (int p = 1; p < series[i].Count; p++)
                     {
-                        if (s == i)
+                        if ((series[i][p].Value == 0) || (series[i][p - 1].Value == 0) || !series[i][p].Value.HasValue || !series[i][p - 1].Value.HasValue)
                             continue;
 
-                        difference = Math.Abs(indexValue.GetValueOrDefault() - series[s][p].Value.GetValueOrDefault());
-                        roundedDifference = difference.CalculateUpperBound(difference, out magnitude);
+                        var indexValue = series[i][p].Value;
+                        if (indexValue.HasValue)
+                        {
+                            if (indexValue > overallMax)
+                                overallMax = indexValue.Value;
+                            if (indexValue < overallMin)
+                                overallMin = indexValue.Value;
+                        }
+
+                        var difference = Math.Abs(indexValue.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
+                        var roundedDifference = difference.CalculateUpperBound(difference, out double magnitude);
                         if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
                             seriesDifferencesRounded[i][roundedDifference]++;
                         else
@@ -260,71 +269,97 @@ namespace helloserve.com.UWPlot
                             seriesMagnitudes[i][magnitude]++;
                         else
                             seriesMagnitudes[i].Add(magnitude, 1);
-                    }
-                }
 
-                foreach (var key in seriesDifferencesRounded[i].Keys)
-                {
-                    if (seriesDifferencesRounded[i][key] > mostDifferenceOccurance)
+                        //compare with other series
+                        for (int s = 0; s < series.Count; s++)
+                        {
+                            if (s == i)
+                                continue;
+
+                            difference = Math.Abs(indexValue.GetValueOrDefault() - series[s][p].Value.GetValueOrDefault());
+                            roundedDifference = difference.CalculateUpperBound(difference, out magnitude);
+                            if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
+                                seriesDifferencesRounded[i][roundedDifference]++;
+                            else
+                                seriesDifferencesRounded[i].Add(roundedDifference, 1);
+
+                            if (seriesMagnitudes[i].ContainsKey(magnitude))
+                                seriesMagnitudes[i][magnitude]++;
+                            else
+                                seriesMagnitudes[i].Add(magnitude, 1);
+                        }
+                    }                    
+
+                    foreach (var key in seriesDifferencesRounded[i].Keys)
                     {
-                        mostDifferenceOccurance = seriesDifferencesRounded[i][key];
-                        mostDifference = key;
+                        if (seriesDifferencesRounded[i][key] > mostDifferenceOccurance)
+                        {
+                            mostDifferenceOccurance = seriesDifferencesRounded[i][key];
+                            mostDifference = key;
+                        }
                     }
-                }
-                foreach (var key in seriesMagnitudes[i].Keys)
-                {
-                    if (seriesMagnitudes[i][key] > mostMagnitudeOccurance)
+                    foreach (var key in seriesMagnitudes[i].Keys)
                     {
-                        mostMagnitudeOccurance = seriesMagnitudes[i][key];
-                        mostMagnitude = key;
+                        if (seriesMagnitudes[i][key] > mostMagnitudeOccurance)
+                        {
+                            mostMagnitudeOccurance = seriesMagnitudes[i][key];
+                            mostMagnitude = key;
+                        }
                     }
                 }
-            }
 
-            double overallDifference = overallMax - overallMin;
+                double overallDifference = overallMax - overallMin;
 
-            double magnitudeMin = 0;
-            double magnitudeMax = 0;
-            if (Min.HasValue)
-            {
-                CalculatedMin = Min.Value;
-            }
-            else
-            {
-                if (overallMin < 0)
-                    CalculatedMin = overallMin.CalculateUpperBound(mostMagnitude);
+                double magnitudeMin = 0;
+                double magnitudeMax = 0;
+
+                bool allNegative = overallMin < 0 && overallMax < 0;
+                bool allPositive = overallMin > 0 && overallMax > 0;
+                bool split = overallMin < 0 && overallMax > 0;
+
+                if (Min.HasValue)
+                {
+                    CalculatedMin = Min.Value;
+                }
                 else
-                    CalculatedMin = overallMin.CalculateLowerBound(mostMagnitude);
-            }
+                {
+                    if (allNegative)
+                        CalculatedMin = overallMin.CalculateUpperBound(mostMagnitude);
+                    else if (split)
+                        CalculatedMin = overallMin.CalculateUpperBound(mostMagnitude);
+                    else
+                        CalculatedMin = overallMin.CalculateLowerBound(mostMagnitude);
+                }
 
-            if (Max.HasValue)
-            {
-                CalculatedMax = Max.Value;
-            }
-            else
-            {
-                if (overallMax < 0)
-                    CalculatedMax = overallMax.CalculateLowerBound(mostMagnitude);
+                if (Max.HasValue)
+                {
+                    CalculatedMax = Max.Value;
+                }
                 else
-                    CalculatedMax = overallMax.CalculateUpperBound(mostMagnitude);
-            }
+                {
+                    if (allNegative)
+                        CalculatedMax = overallMax.CalculateLowerBound(mostMagnitude);
+                    else
+                        CalculatedMax = overallMax.CalculateUpperBound(mostMagnitude);
+                }
 
-            if (magnitudeMax > magnitudeMin)
-            {
-                if (CalculatedMin > 0)
-                    CalculatedMin = 0;
-                //we can't really increase the magnitude, since the lower bound can't go higher, so best to just make it zero.
+                if (magnitudeMax > magnitudeMin)
+                {
+                    if (CalculatedMin > 0)
+                        CalculatedMin = 0;
+                    //we can't really increase the magnitude, since the lower bound can't go higher, so best to just make it zero.
+                }
+                else if (magnitudeMin > magnitudeMax && CalculatedMax != 0)
+                {
+                    if (CalculatedMax < 0 && CalculatedMin < 0)
+                        CalculatedMax = 0;
+                    else
+                        CalculatedMax = magnitudeMin * (CalculatedMax / Math.Abs(CalculatedMax));
+                }
+                MagnitudeMin = mostMagnitude;
+                MagnitudeMax = mostMagnitude;
+                BaseMagnitude = mostMagnitude;
             }
-            else if (magnitudeMin > magnitudeMax && CalculatedMax != 0)
-            {
-                if (CalculatedMax < 0 && CalculatedMin < 0)
-                    CalculatedMax = 0;
-                else
-                    CalculatedMax = magnitudeMin * (CalculatedMax / Math.Abs(CalculatedMax));
-            }
-            MagnitudeMin = mostMagnitude;
-            MagnitudeMax = mostMagnitude;
-            BaseMagnitude = mostMagnitude;
         }
 
         /// <summary>
@@ -406,10 +441,10 @@ namespace helloserve.com.UWPlot
                 {
                     if (!isMaxEven)
                     {
-                        if (maxPart < 1)
-                            maxPart--;
-                        else
-                            maxPart++;                        
+                        if (maxPart > 0)
+                            maxPart++;
+                        else if (maxPart + 1 <= 0)
+                            maxPart++;
                     }
 
                     if (!isMinEven)

@@ -146,5 +146,33 @@ namespace helloserve.com.UWPlot
 
             return magnitude;
         }
+
+        public static double MaxOf(params double[] values)
+        {
+            double max = double.MinValue;
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i] > max)
+                {
+                    max = values[i];
+                }
+            }
+
+            return max;
+        }
+
+        public static double MinOf(params double[] values)
+        {
+            double min = double.MaxValue;
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i] < min)
+                {
+                    min = values[i];
+                }
+            }
+
+            return min;
+        }
     }
 }

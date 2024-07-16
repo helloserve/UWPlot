@@ -241,14 +241,17 @@ namespace helloserve.com.UWPlot
                         message = "There are different number of data points in the different series. These have to match. Provide null values for the catogories that are missing.";
                     }
 
-                    for (int i = 0; i < Series[0].ItemsDataPoints.Count; i++)
+                    if (Series.Count > 0)
                     {
-                        string category = Series[0].ItemsDataPoints[i].Category;
-                        foreach (var series in Series)
+                        for (int i = 0; i < Series[0].ItemsDataPoints.Count; i++)
                         {
-                            if (!series.ItemsDataPoints[i].Category.Equals(category))
+                            string category = Series[0].ItemsDataPoints[i].Category;
+                            foreach (var series in Series)
                             {
-                                message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} has category {series.ItemsDataPoints[i].Category} which does not match the first or primary series in position {i}.";
+                                if (!series.ItemsDataPoints[i].Category.Equals(category))
+                                {
+                                    message += $"{Environment.NewLine}Series #{Series.IndexOf(series)} has category {series.ItemsDataPoints[i].Category} which does not match the first or primary series in position {i}.";
+                                }
                             }
                         }
                     }
@@ -488,24 +491,30 @@ namespace helloserve.com.UWPlot
                 }
             }
 
-            double lineStepX = PlotExtents.VerticalGridLineSpace + PlotExtents.PlotAreaTopLeft.X;
-            double categoryStep = Math.Ceiling(Math.Max(1D, DataExtents.TotalCategoryWidth / PlotExtents.AreaWidth));
-            for (int i = 0; i < PlotExtents.VerticalGridLineCount; i++)
+            if (Series.Any())
             {
-                LayoutRoot.DrawLine(lineStepX, PlotExtents.PlotFrameTopLeft.Y, lineStepX, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, GridLineStrokeThickness);
-                
-                if (PlotExtents.VerticalGridLineCount >= 1 && (i + 1) % categoryStep == 0)
+                double lineStepX = PlotExtents.VerticalGridLineSpace + PlotExtents.PlotAreaTopLeft.X;
+                double categoryStep = Math.Ceiling(Math.Max(1D, DataExtents.TotalCategoryWidth / PlotExtents.AreaWidth));
+                for (int i = 0; i < PlotExtents.VerticalGridLineCount; i++)
                 {
-                    if (i == PlotExtents.VerticalGridLineCount - 1 && categoryStep > 1)
-                        continue;
+                    LayoutRoot.DrawLine(lineStepX, PlotExtents.PlotFrameTopLeft.Y, lineStepX, PlotExtents.PlotFrameBottomRight.Y, PlotAreaStrokeBrush, GridLineStrokeThickness);
 
-                    LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
-                }                
+                    if (PlotExtents.VerticalGridLineCount >= 1 && (i + 1) % categoryStep == 0)
+                    {
+                        if (i == PlotExtents.VerticalGridLineCount - 1 && categoryStep > 1)
+                            continue;
 
-                lineStepX += PlotExtents.VerticalGridLineSpace;
+                        if (Series[0].ItemsDataPoints.Count > 1 + i)
+                        {
+                            LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[1 + i].Category, lineStepX, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
+                        }
+                    }
+
+                    lineStepX += PlotExtents.VerticalGridLineSpace;
+                }
+                LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[0].Category, PlotExtents.PlotAreaTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
+                LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[Series[0].ItemsDataPoints.Count - 1].Category, PlotExtents.PlotAreaBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
             }
-            LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[0].Category, PlotExtents.PlotAreaTopLeft.X, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
-            LayoutRoot.DrawCategoryItem(Series[0].ItemsDataPoints[Series[0].ItemsDataPoints.Count - 1].Category, PlotExtents.PlotAreaBottomRight.X, PlotExtents.PlotFrameBottomRight.Y, FontSize, paddingFactor: PaddingFactor, transform: XAxis.LabelTransform);
 
             double legendX = (PlotExtents.LegendAreaBottomRight.X - PlotExtents.LegendAreaTopLeft.X) * 0.08D;
             foreach (CartesianSeries series in Series)
