@@ -116,21 +116,21 @@ namespace UWPlot.App
 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data4_1)));
 
-                Data5.Add(new LedgerPoint() { Category = "Ledger 1", Name = "Data5-1", Value = -4500 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 2", Name = "Data5-2", Value = -3400 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 3", Name = "Data5-3", Value = -65890 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 4", Name = "Data5-4", Value = -24000 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 5", Name = "Data5-5", Value = -15000 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data5-6", Value = -9000 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data5-7", Value = -2500 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data5-8", Value = -100 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data5-9", Value = -1000 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data5-10", Value = -3400 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data4-6", Value = -1000 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 1", Name = "Data5-1", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 2", Name = "Data5-2", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 3", Name = "Data5-3", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 4", Name = "Data5-4", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 5", Name = "Data5-5", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data5-6", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data5-7", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data5-8", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data5-9", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data5-10", Value = -340 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 6", Name = "Data4-6", Value = -100 });
                 Data5.Add(new LedgerPoint() { Category = "Ledger 7", Name = "Data4-7", Value = 0 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data4-8", Value = -7000 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data4-9", Value = -6000 });
-                Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data4-10", Value = -5000 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 8", Name = "Data4-8", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 9", Name = "Data4-9", Value = 0 });
+                Data5.Add(new LedgerPoint() { Category = "Ledger 10", Name = "Data4-10", Value = 0 });
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Data5)));
 
                 Data6.Add(new LedgerPoint() { Category = "Ledger 1", Name = "Data6-1", Value = -4500 });

@@ -246,9 +246,6 @@ namespace helloserve.com.UWPlot
 
                     for (int p = 1; p < series[i].Count; p++)
                     {
-                        if ((series[i][p].Value == 0) || (series[i][p - 1].Value == 0) || !series[i][p].Value.HasValue || !series[i][p - 1].Value.HasValue)
-                            continue;
-
                         var indexValue = series[i][p].Value;
                         if (indexValue.HasValue)
                         {
@@ -260,15 +257,21 @@ namespace helloserve.com.UWPlot
 
                         var difference = Math.Abs(indexValue.GetValueOrDefault() - series[i][p - 1].Value.GetValueOrDefault());
                         var roundedDifference = difference.CalculateUpperBound(difference, out double magnitude);
-                        if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
-                            seriesDifferencesRounded[i][roundedDifference]++;
-                        else
-                            seriesDifferencesRounded[i].Add(roundedDifference, 1);
+                        if (roundedDifference > 0)
+                        {
+                            if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
+                                seriesDifferencesRounded[i][roundedDifference]++;
+                            else
+                                seriesDifferencesRounded[i].Add(roundedDifference, 1);
+                        }
 
-                        if (seriesMagnitudes[i].ContainsKey(magnitude))
-                            seriesMagnitudes[i][magnitude]++;
-                        else
-                            seriesMagnitudes[i].Add(magnitude, 1);
+                        if (magnitude > 0)
+                        {
+                            if (seriesMagnitudes[i].ContainsKey(magnitude))
+                                seriesMagnitudes[i][magnitude]++;
+                            else
+                                seriesMagnitudes[i].Add(magnitude, 1);
+                        }
 
                         //compare with other series
                         for (int s = 0; s < series.Count; s++)
@@ -278,15 +281,21 @@ namespace helloserve.com.UWPlot
 
                             difference = Math.Abs(indexValue.GetValueOrDefault() - series[s][p].Value.GetValueOrDefault());
                             roundedDifference = difference.CalculateUpperBound(difference, out magnitude);
-                            if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
-                                seriesDifferencesRounded[i][roundedDifference]++;
-                            else
-                                seriesDifferencesRounded[i].Add(roundedDifference, 1);
+                            if (roundedDifference > 0)
+                            {
+                                if (seriesDifferencesRounded[i].ContainsKey(roundedDifference))
+                                    seriesDifferencesRounded[i][roundedDifference]++;
+                                else
+                                    seriesDifferencesRounded[i].Add(roundedDifference, 1);
+                            }
 
-                            if (seriesMagnitudes[i].ContainsKey(magnitude))
-                                seriesMagnitudes[i][magnitude]++;
-                            else
-                                seriesMagnitudes[i].Add(magnitude, 1);
+                            if (magnitude > 0)
+                            {
+                                if (seriesMagnitudes[i].ContainsKey(magnitude))
+                                    seriesMagnitudes[i][magnitude]++;
+                                else
+                                    seriesMagnitudes[i].Add(magnitude, 1);
+                            }
                         }
                     }                    
 
@@ -313,9 +322,9 @@ namespace helloserve.com.UWPlot
                 double magnitudeMin = 0;
                 double magnitudeMax = 0;
 
-                bool allNegative = overallMin < 0 && overallMax < 0;
-                bool allPositive = overallMin > 0 && overallMax > 0;
-                bool split = overallMin < 0 && overallMax > 0;
+                bool allNegative = overallMin <= 0 && overallMax <= 0;
+                bool allPositive = overallMin >= 0 && overallMax >= 0;
+                bool split = overallMin <= 0 && overallMax >= 0;
 
                 if (Min.HasValue)
                 {

@@ -23,6 +23,12 @@ namespace helloserve.com.UWPlot
 
         private static double CalculateUpperBoundFromValue(this double value, double? range, out double magnitude)
         {
+            if (value == 0)
+            {
+                magnitude = 0;
+                return 0;
+            }
+
             if (value < 0)
                 return CalculateUpperBound(Math.Abs(value), range, out magnitude) * -1;
 
